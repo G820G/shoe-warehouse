@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1A1D23">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>靴履云仓</title>
+<link rel="manifest" href="./manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #F5F3F0;
+  --card: #FFFFFF;
+  --primary: #1A1D23;
+  --accent: #E8700A;
+  --accent-light: #FFF5ED;
+  --success: #059669;
+  --success-light: #ECFDF5;
+  --danger: #DC2626;
+  --danger-light: #FEF2F2;
+  --warning: #D97706;
+  --warning-light: #FFFBEB;
+  --text: #1A1D23;
+  --text-secondary: #6B7280;
+  --border: #E5E7EB;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.12);
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+  --font: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-mono: "SF Mono","Cascadia Code","Consolas",monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-family:var(--font);font-size:15px;color:var(--text);background:var(--bg);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+body{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+img{max-width:100%;display:block}
+
+/* Header */
+.header{position:sticky;top:0;z-index:100;background:var(--primary);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header h1{font-size:17px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.header-actions{display:flex;gap:8px}
+.header-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);transition:background .15s}
+.header-btn:active{background:rgba(255,255,255,.24)}
+.search-bar{display:flex;flex:1;align-items:center;gap:8px;background:rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:0 12px;height:36px}
+.search-bar input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;min-width:0}
+.search-bar input::placeholder{color:rgba(255,255,255,.4)}
+.search-bar svg{flex-shrink:0;opacity:.5}
+
+/* Main content */
+.main{padding:16px;padding-bottom:calc(80px + var(--safe-bottom))}
+
+/* Cards */
+.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
+.card-value{font-size:28px;font-weight:700;font-family:var(--font-mono);letter-spacing:-.02em}
+.card-sub{font-size:12px;color:var(--text-secondary);margin-top:4px}
+
+/* Stat row */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-row.three{grid-template-columns:1fr 1fr 1fr}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat-card .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.stat-card .stat-value{font-size:22px;font-weight:700;font-family:var(--font-mono)}
+.stat-card .stat-label{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.stat-card .stat-trend{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px}
+
+/* Icon backgrounds */
+.icon-in{background:#ECFDF5;color:var(--success)}
+.icon-out{background:#FEF2F2;color:var(--danger)}
+.icon-store{background:#FFF5ED;color:var(--accent)}
+.icon-warn{background:#FFFBEB;color:var(--warning)}
+
+/* Alert row */
+.alert-item{display:flex;align-items:center;padding:12px;background:var(--warning-light);border-radius:var(--radius-sm);margin-bottom:8px;gap:10px}
+.alert-item .alert-dot{width:8px;height:8px;border-radius:50%;background:var(--warning);flex-shrink:0}
+.alert-item .alert-info{flex:1;min-width:0}
+.alert-item .alert-name{font-size:14px;font-weight:500}
+.alert-item .alert-meta{font-size:12px;color:var(--text-secondary)}
+.alert-item .alert-stock{font-size:14px;font-weight:600;color:var(--warning)}
+
+/* List items */
+.list-item{display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;cursor:pointer;transition:background .1s}
+.list-item:active{background:rgba(0,0,0,.02);margin:0 -16px;padding:14px 16px}
+.list-item:last-child{border-bottom:none}
+.list-thumb{width:48px;height:48px;border-radius:var(--radius-sm);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
+.list-thumb img{width:100%;height:100%;object-fit:cover}
+.list-info{flex:1;min-width:0}
+.list-name{font-size:15px;font-weight:500;line-height:1.3}
+.list-meta{font-size:12px;color:var(--text-secondary);margin-top:2px;display:flex;gap:8px}
+.list-right{text-align:right;flex-shrink:0}
+.list-right .count{font-size:16px;font-weight:600;font-family:var(--font-mono)}
+.list-right .sub{font-size:11px;color:var(--text-secondary)}
+.list-right .in{color:var(--success)}
+.list-right .out{color:var(--danger)}
+
+/* Empty state */
+.empty{text-align:center;padding:48px 24px;color:var(--text-secondary)}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:.6}
+.empty h3{font-size:16px;margin-bottom:6px;color:var(--text)}
+.empty p{font-size:13px;line-height:1.5}
+.empty .btn{margin-top:16px}
+
+/* Bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:var(--safe-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 6px;font-size:10px;color:var(--text-secondary);gap:3px;transition:color .15s;position:relative}
+.nav-item.active{color:var(--accent)}
+.nav-item svg{width:22px;height:22px}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(64px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:101;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(232,112,10,.4)}
+.fab:active{transform:translateX(-50%) scale(.95)}
+.fab-menu{position:fixed;bottom:calc(120px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;opacity:0;transition:opacity .2s}
+.fab-menu.open{pointer-events:auto;opacity:1}
+.fab-menu-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:32px;padding:10px 18px 10px 10px;box-shadow:var(--shadow-md);cursor:pointer;white-space:nowrap}
+.fab-menu-item .fab-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+.fab-menu-item .fab-label{font-size:13px;font-weight:500}
+.fab-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:98;opacity:0;pointer-events:none;transition:opacity .2s}
+.fab-overlay.open{opacity:1;pointer-events:auto}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:active{background:#d06509}
+.btn-secondary{background:var(--bg);color:var(--text)}
+.btn-secondary:active{background:var(--border)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:6px 14px;font-size:13px;border-radius:6px}
+.btn-block{display:flex;width:100%}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:480px;max-height:90dvh;display:flex;flex-direction:column;transform:translateY(20px);transition:transform .25s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-header h2{font-size:17px;font-weight:600}
+.modal-close{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+.modal-body{overflow-y:auto;padding:16px;flex:1}
+.modal-footer{padding:16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+.modal-footer .btn{flex:1}
+
+/* Form */
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.form-label .req{color:var(--danger)}
+.form-input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--bg);transition:border-color .15s;outline:none}
+.form-input:focus{border-color:var(--accent);background:var(--card)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-textarea{min-height:80px;resize:vertical}
+.photo-pick{width:100%;height:120px;border:2px dashed var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--text-secondary);cursor:pointer;transition:border-color .15s;overflow:hidden;position:relative}
+.photo-pick:active{border-color:var(--accent)}
+.photo-pick img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-pick.has-photo{border-style:solid}
+.photo-pick .photo-remove{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center;z-index:1;font-size:14px}
+
+/* Tags/Chips */
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.tag-in{background:var(--success-light);color:var(--success)}
+.tag-out{background:var(--danger-light);color:var(--danger)}
+.tag-warn{background:var(--warning-light);color:var(--warning)}
+
+/* Toast */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120px);z-index:300;background:var(--primary);color:#fff;padding:12px 20px;border-radius:32px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);transition:transform .3s ease;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--success)}
+
+/* Confirm dialog */
+.confirm-overlay{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px}
+.confirm-overlay.open{opacity:1;pointer-events:auto}
+.confirm-box{background:var(--card);border-radius:var(--radius);padding:24px;width:100%;max-width:320px;text-align:center}
+.confirm-box h3{font-size:16px;margin-bottom:8px}
+.confirm-box p{font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5}
+.confirm-actions{display:flex;gap:10px}
+.confirm-actions .btn{flex:1}
+
+/* Product detail */
+.detail-header{position:relative;background:var(--primary);padding:24px 16px 32px;color:#fff}
+.detail-header .back-btn{position:absolute;top:12px;left:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center}
+.detail-photo{width:80px;height:80px;border-radius:var(--radius-sm);background:rgba(255,255,255,.1);margin-bottom:12px;overflow:hidden}
+.detail-name{font-size:20px;font-weight:600;margin-bottom:4px}
+.detail-sku{font-size:13px;opacity:.6}
+.detail-stock{font-size:36px;font-weight:700;font-family:var(--font-mono);margin-top:12px}
+.detail-meta-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.detail-body{padding:16px}
+.detail-section{margin-bottom:20px}
+.detail-section h4{font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.detail-field{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.detail-field:last-child{border-bottom:none}
+.detail-field .key{color:var(--text-secondary)}
+.detail-field .val{font-weight:500}
+
+/* Settings card */
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;cursor:pointer}
+.setting-item:last-child{border-bottom:none}
+.setting-item .setting-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.setting-item .setting-info{flex:1;min-width:0}
+.setting-item .setting-name{font-size:14px;font-weight:500}
+.setting-item .setting-desc{font-size:12px;color:var(--text-secondary);margin-top:1px}
+.setting-item .setting-arrow{color:var(--text-secondary);flex-shrink:0}
+.setting-section{margin-bottom:20px}
+.setting-section h4{font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding:0 4px}
+
+/* File input */
+.file-input{display:none}
+
+/* Pulsing dot animation */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 2s ease infinite}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:0}
+
+/* Uitlity */
+.flex-center{display:flex;align-items:center;justify-content:center}
+.text-secondary{color:var(--text-secondary)}
+.text-sm{font-size:13px}
+.text-xs{font-size:11px}
+.mt-2{margin-top:8px}
+.mb-2{margin-bottom:8px}
+.gap-1{gap:4px}
+.gap-2{gap:8px}
+
+@media (min-width:481px){
+  .modal{border-radius:var(--radius);max-height:80dvh}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" id="appHeader">
+  <div class="search-bar" id="searchBar" style="display:none">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="搜索商品、SKU...">
+  </div>
+  <h1 id="headerTitle">靴履云仓</h1>
+  <div class="header-actions">
+    <button class="header-btn" id="btnSearch" aria-label="搜索">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="main" id="mainContent"></main>
+
+<!-- Bottom Nav -->
+<nav class="nav">
+  <button class="nav-item active" data-page="dashboard">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>首页</span>
+  </button>
+  <button class="nav-item" data-page="products">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <span>库存</span>
+  </button>
+  <button class="nav-item" data-page="transactions">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    <span>记录</span>
+  </button>
+  <button class="nav-item" data-page="settings">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>设置</span>
+  </button>
+</nav>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" aria-label="快捷操作">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+<div class="fab-menu" id="fabMenu">
+  <button class="fab-menu-item" data-action="inbound">
+    <span class="fab-icon" style="background:#ECFDF5;color:var(--success)">↓</span>
+    <span class="fab-label">入库</span>
+  </button>
+  <button class="fab-menu-item" data-action="outbound">
+    <span class="fab-icon" style="background:#FEF2F2;color:var(--danger)">↑</span>
+    <span class="fab-label">出库</span>
+  </button>
+  <button class="fab-menu-item" data-action="addProduct">
+    <span class="fab-icon" style="background:#FFF5ED;color:var(--accent)">+</span>
+    <span class="fab-label">新增商品</span>
+  </button>
+</div>
+<div class="fab-overlay" id="fabOverlay"></div>
+
+<!-- Modal container -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <h2 id="modalTitle">标题</h2>
+      <button class="modal-close" id="modalClose">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">确认操作</h3>
+    <p id="confirmMsg">确定要执行此操作吗？</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" id="confirmCancel">取消</button>
+      <button class="btn btn-danger" id="confirmOK">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" class="file-input" id="excelFileInput" accept=".xlsx,.xls,.csv">
+
+<script>
+// ============ IndexedDB Layer ============
+const DB_NAME = 'ShoeWarehouseDB';
+const DB_VERSION = 1;
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('products')) {
+        const ps = d.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
+        ps.createIndex('sku', 'sku', { unique: true });
+        ps.createIndex('category', 'category');
+        ps.createIndex('name', 'name');
+      }
+      if (!d.objectStoreNames.contains('transactions')) {
+        const ts = d.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+        ts.createIndex('productId', 'productId');
+        ts.createIndex('type', 'type');
+        ts.createIndex('createdAt', 'createdAt');
+      }
+      if (!d.objectStoreNames.contains('categories')) {
+        const cs = d.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
+        cs.createIndex('name', 'name', { unique: true });
+      }
+      if (!d.objectStoreNames.contains('suppliers')) {
+        const ss = d.createObjectStore('suppliers', { keyPath: 'id', autoIncrement: true });
+        ss.createIndex('name', 'name', { unique: true });
+      }
+      if (!d.objectStoreNames.contains('settings')) {
+        d.createObjectStore('settings', { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbPut(storeName, data) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.put(data);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGet(storeName, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const req = tx.objectStore(storeName).get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGetAll(storeName) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const req = tx.objectStore(storeName).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbDelete(storeName, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    const req = tx.objectStore(storeName).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbClear(storeName) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    const req = tx.objectStore(storeName).clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGetByIndex(storeName, indexName, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const req = tx.objectStore(storeName).index(indexName).getAll(value);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ============ Service Worker Registration ============
+if ('serviceWorker' in navigator) {
+  const swCode = `
+const CACHE = 'shoe-warehouse-v1';
+const URLS = ['/'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+    if (res.ok) { const clone = res.clone(); caches.open(CACHE).then(c => c.put(e.request, clone)); }
+    return res;
+  })));
+});
+`;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// ============ Helpers ============
+const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+const $$ = (sel, ctx) => (ctx || document).querySelectorAll(sel);
+const el = (tag, attrs = {}, html = '') => {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => { if (k === 'className') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); });
+  if (html) e.innerHTML = html;
+  return e;
+};
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fmtDateShort(ts) {
+  const d = new Date(ts);
+  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function showToast(msg, type = '') {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.classList.remove('show'); }, 2200);
+}
+
+function confirm(msg, title = '确认操作') {
+  return new Promise(resolve => {
+    $('#confirmTitle').textContent = title;
+    $('#confirmMsg').textContent = msg;
+    const ov = $('#confirmOverlay');
+    ov.classList.add('open');
+    const cleanup = (val) => {
+      ov.classList.remove('open');
+      $('#confirmOK').removeEventListener('click', onOk);
+      $('#confirmCancel').removeEventListener('click', onCancel);
+      resolve(val);
+    };
+    const onOk = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+    $('#confirmOK').addEventListener('click', onOk);
+    $('#confirmCancel').addEventListener('click', onCancel);
+  });
+}
+
+// ============ Modal ============
+function openModal(title, bodyHTML, footerHTML = '') {
+  $('#modalTitle').textContent = title;
+  $('#modalBody').innerHTML = bodyHTML;
+  $('#modalFooter').innerHTML = footerHTML;
+  $('#modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  $('#modalOverlay').classList.remove('open');
+}
+
+$('#modalClose').addEventListener('click', closeModal);
+$('#modalOverlay').addEventListener('click', (e) => { if (e.target === $('#modalOverlay')) closeModal(); });
+
+// ============ Navigation & FAB ============
+let currentPage = 'dashboard';
+
+function navigateTo(page, params = {}) {
+  currentPage = page;
+  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  if (page === 'dashboard') { renderDashboard(); $('#headerTitle').textContent = '靴履云仓'; $('#searchBar').style.display = 'none'; }
+  else if (page === 'products') { renderProducts(params); $('#headerTitle').textContent = '库存管理'; $('#searchBar').style.display = 'flex'; }
+  else if (page === 'transactions') { renderTransactions(params); $('#headerTitle').textContent = '出入库记录'; $('#searchBar').style.display = 'none'; }
+  else if (page === 'settings') { renderSettings(); $('#headerTitle').textContent = '设置'; $('#searchBar').style.display = 'none'; }
+  $('#mainContent').scrollTop = 0;
+  closeFabMenu();
+}
+
+$$('.nav-item').forEach(n => n.addEventListener('click', () => navigateTo(n.dataset.page)));
+
+let fabOpen = false;
+function toggleFab() {
+  fabOpen = !fabOpen;
+  $('#fabMenu').classList.toggle('open', fabOpen);
+  $('#fabOverlay').classList.toggle('open', fabOpen);
+  if (fabOpen) {
+    $('#fabBtn').innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  } else {
+    $('#fabBtn').innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  }
+}
+function closeFabMenu() { if (fabOpen) toggleFab(); }
+
+$('#fabBtn').addEventListener('click', toggleFab);
+$('#fabOverlay').addEventListener('click', closeFabMenu);
+$$('.fab-menu-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const action = item.dataset.action;
+    closeFabMenu();
+    if (action === 'inbound') showTransactionForm('in');
+    else if (action === 'outbound') showTransactionForm('out');
+    else if (action === 'addProduct') showProductForm();
+  });
+});
+
+// Search
+let searchTimer;
+$('#searchInput').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    if (currentPage === 'products') renderProducts({ search: $('#searchInput').value.trim() });
+  }, 300);
+});
+
+$('#btnSearch').addEventListener('click', () => {
+  if (currentPage === 'products') {
+    navigateTo('products', { search: '' });
+    $('#searchInput').value = '';
+    $('#searchInput').focus();
+  } else {
+    navigateTo('products');
+  }
+});
+
+// ============ Dashboard ============
+async function renderDashboard() {
+  const main = $('#mainContent');
+  const products = await dbGetAll('products');
+  const transactions = await dbGetAll('transactions');
+  const st = await dbGetAll('settings');
+  const lowStockThreshold = parseInt(st.find(s => s.key === 'lowStockThreshold')?.value || '10');
+
+  const totalProducts = products.length;
+  const totalStock = products.reduce((s, p) => s + (p.stock || 0), 0);
+  const totalValue = products.reduce((s, p) => s + (p.cost || 0) * (p.stock || 0), 0);
+  const lowStockItems = products.filter(p => (p.stock || 0) <= lowStockThreshold);
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayTx = transactions.filter(t => t.createdAt >= todayStart);
+  const todayIn = todayTx.filter(t => t.type === 'in').reduce((s, t) => s + t.quantity, 0);
+  const todayOut = todayTx.filter(t => t.type === 'out').reduce((s, t) => s + t.quantity, 0);
+
+  const recentTx = [...transactions].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+
+  main.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon icon-store"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <div class="stat-value">${totalStock.toLocaleString()}</div>
+        <div class="stat-label">库存总量</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div class="stat-value">${totalProducts}</div>
+        <div class="stat-label">商品种类</div>
+      </div>
+    </div>
+    <div class="stat-row three">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--success);font-size:20px">${todayIn}</div>
+        <div class="stat-label">今日入库</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--danger);font-size:20px">${todayOut}</div>
+        <div class="stat-label">今日出库</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--warning);font-size:20px">${lowStockItems.length}</div>
+        <div class="stat-label">库存不足</div>
+      </div>
+    </div>
+
+    ${lowStockItems.length > 0 ? `
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚠ 低库存提醒</span>
+        <a href="javascript:void(0)" onclick="navigateTo('products',{filter:'low'})" style="font-size:13px;color:var(--accent)">查看全部 →</a>
+      </div>
+      ${lowStockItems.slice(0, 5).map(p => `
+        <div class="alert-item">
+          <div class="alert-dot pulse"></div>
+          <div class="alert-info">
+            <div class="alert-name">${escHtml(p.name)}</div>
+            <div class="alert-meta">${p.sku || ''} · ${p.location || '未设库位'}</div>
+          </div>
+          <div class="alert-stock">${p.stock || 0}</div>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">最近操作</span>
+        <a href="javascript:void(0)" onclick="navigateTo('transactions')" style="font-size:13px;color:var(--accent)">全部 →</a>
+      </div>
+      ${recentTx.length === 0 ? '<div class="empty" style="padding:24px"><p>暂无操作记录</p></div>' :
+      recentTx.map(t => {
+        const p = products.find(x => x.id === t.productId);
+        const isIn = t.type === 'in';
+        return `<div class="list-item" onclick="showTransactionDetail(${t.id})">
+          <div class="list-thumb" style="font-size:18px">${isIn ? '📥' : '📤'}</div>
+          <div class="list-info">
+            <div class="list-name">${escHtml(p?.name || '已删除商品')}</div>
+            <div class="list-meta">${fmtDate(t.createdAt)} · ${t.supplier || t.destination || ''}</div>
+          </div>
+          <div class="list-right">
+            <div class="count ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}${t.quantity}</div>
+            <div class="sub">${t.sku || ''}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ============ Products ============
+async function renderProducts({ search, filter } = {}) {
+  const main = $('#mainContent');
+  let products = await dbGetAll('products');
+  const st = await dbGetAll('settings');
+  const lowStockThreshold = parseInt(st.find(s => s.key === 'lowStockThreshold')?.value || '10');
+
+  if (search) {
+    const q = search.toLowerCase();
+    products = products.filter(p => (p.name || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q));
+    $('#searchInput').value = search;
+  }
+  if (filter === 'low') {
+    products = products.filter(p => (p.stock || 0) <= lowStockThreshold);
+  }
+
+  products.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+
+  if (products.length === 0) {
+    main.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📦</div>
+        <h3>${search ? '未找到匹配商品' : '还没有商品'}</h3>
+        <p>${search ? '试试其他关键词' : '点击下方 + 按钮添加第一个商品'}</p>
+        ${!search ? '<button class="btn btn-primary" onclick="showProductForm()">添加商品</button>' : ''}
+      </div>
+    `;
+    return;
+  }
+
+  main.innerHTML = products.map(p => {
+    const low = (p.stock || 0) <= lowStockThreshold;
+    return `<div class="list-item" onclick="showProductDetail(${p.id})">
+      <div class="list-thumb">
+        ${p.photo ? `<img src="${p.photo}" alt="">` : '<span>👟</span>'}
+      </div>
+      <div class="list-info">
+        <div class="list-name">${escHtml(p.name)}${low ? ' <span class="tag tag-warn" style="margin-left:6px">低库存</span>' : ''}</div>
+        <div class="list-meta">${p.sku || '无SKU'} · ${p.category || '未分类'} · ${p.size || ''}${p.color ? ' · ' + p.color : ''}</div>
+      </div>
+      <div class="list-right">
+        <div class="count" style="color:${low ? 'var(--warning)' : 'inherit'}">${p.stock || 0}</div>
+        <div class="sub">${p.location || ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function showProductDetail(id) {
+  const p = await dbGet('products', id);
+  if (!p) return;
+  const main = $('#mainContent');
+  const lowThreshold = parseInt((await dbGetAll('settings')).find(s => s.key === 'lowStockThreshold')?.value || '10');
+  const low = (p.stock || 0) <= lowThreshold;
+
+  main.innerHTML = `
+    <div class="detail-header">
+      <button class="back-btn" onclick="navigateTo('products')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="detail-photo">${p.photo ? `<img src="${p.photo}" alt="" style="width:100%;height:100%;object-fit:cover">` : ''}</div>
+      <div class="detail-name">${escHtml(p.name)}</div>
+      <div class="detail-sku">${p.sku || '无SKU'}</div>
+      <div class="detail-stock">${p.stock || 0} <span style="font-size:14px;font-weight:400;opacity:.6">双</span></div>
+      <div class="detail-meta-row">
+        ${low ? '<span class="tag tag-warn">库存不足</span>' : '<span class="tag tag-in">库存正常</span>'}
+        ${p.category ? `<span class="tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.9)">${escHtml(p.category)}</span>` : ''}
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h4>基本信息</h4>
+        <div class="detail-field"><span class="key">品牌</span><span class="val">${escHtml(p.brand || '-')}</span></div>
+        <div class="detail-field"><span class="key">尺码</span><span class="val">${escHtml(p.size || '-')}</span></div>
+        <div class="detail-field"><span class="key">颜色</span><span class="val">${escHtml(p.color || '-')}</span></div>
+        <div class="detail-field"><span class="key">分类</span><span class="val">${escHtml(p.category || '-')}</span></div>
+        <div class="detail-field"><span class="key">供应商</span><span class="val">${escHtml(p.supplier || '-')}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>库存信息</h4>
+        <div class="detail-field"><span class="key">当前库存</span><span class="val" style="color:${low ? 'var(--danger)' : 'inherit'}">${p.stock || 0} 双</span></div>
+        <div class="detail-field"><span class="key">最低库存阈值</span><span class="val">${p.minStock ?? lowThreshold} 双</span></div>
+        <div class="detail-field"><span class="key">库位</span><span class="val">${escHtml(p.location || '-')}</span></div>
+        <div class="detail-field"><span class="key">成本价</span><span class="val">${p.cost ? '¥' + Number(p.cost).toFixed(2) : '-'}</span></div>
+        <div class="detail-field"><span class="key">零售价</span><span class="val">${p.price ? '¥' + Number(p.price).toFixed(2) : '-'}</span></div>
+      </div>
+      ${p.note ? `<div class="detail-section"><h4>备注</h4><p style="font-size:14px;line-height:1.6;white-space:pre-wrap">${escHtml(p.note)}</p></div>` : ''}
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary" style="flex:1" onclick="showProductForm(${p.id})">编辑</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="showTransactionForm('in', ${p.id})">入库</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="showTransactionForm('out', ${p.id})">出库</button>
+      </div>
+    </div>
+  `;
+}
+
+async function showProductForm(editId = null) {
+  let product = null;
+  if (editId) product = await dbGet('products', editId);
+  const categories = await dbGetAll('categories');
+  const suppliers = await dbGetAll('suppliers');
+
+  openModal(editId ? '编辑商品' : '新增商品', `
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 商品名称</label>
+      <input class="form-input" id="pfName" value="${escHtml(product?.name || '')}" placeholder="例如：Airmax 270 男款运动鞋">
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label"><span class="req">*</span> SKU编码</label>
+        <input class="form-input" id="pfSku" value="${escHtml(product?.sku || '')}" placeholder="例如：AM270-M-BK-42">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">品牌</label>
+        <input class="form-input" id="pfBrand" value="${escHtml(product?.brand || '')}" placeholder="例如：Nike">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">尺码</label>
+        <input class="form-input" id="pfSize" value="${escHtml(product?.size || '')}" placeholder="例如：42">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">颜色</label>
+        <input class="form-input" id="pfColor" value="${escHtml(product?.color || '')}" placeholder="例如：黑色">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">分类</label>
+        <select class="form-input" id="pfCategory">
+          <option value="">未分类</option>
+          ${categories.map(c => `<option value="${escHtml(c.name)}" ${product?.category === c.name ? 'selected' : ''}>${escHtml(c.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">供应商</label>
+        <select class="form-input" id="pfSupplier">
+          <option value="">无</option>
+          ${suppliers.map(s => `<option value="${escHtml(s.name)}" ${product?.supplier === s.name ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label"><span class="req">*</span> 初始库存</label>
+        <input class="form-input" id="pfStock" type="number" min="0" value="${product?.stock || 0}">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">最低库存阈值</label>
+        <input class="form-input" id="pfMinStock" type="number" min="0" value="${product?.minStock || ''}" placeholder="全局默认10">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">成本价 (¥)</label>
+        <input class="form-input" id="pfCost" type="number" step="0.01" min="0" value="${product?.cost || ''}">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">零售价 (¥)</label>
+        <input class="form-input" id="pfPrice" type="number" step="0.01" min="0" value="${product?.price || ''}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">库位</label>
+      <input class="form-input" id="pfLocation" value="${escHtml(product?.location || '')}" placeholder="例如：A区-3排-12号">
+    </div>
+    <div class="form-group">
+      <label class="form-label">商品图片</label>
+      <div class="photo-pick ${product?.photo ? 'has-photo' : ''}" id="pfPhoto" onclick="document.getElementById('pfPhotoInput').click()">
+        ${product?.photo ? `<img src="${product.photo}" alt="">` : '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:13px">点击拍照或选择图片</span>'}
+        ${product?.photo ? `<span class="photo-remove" onclick="event.stopPropagation();clearPhoto('pfPhoto','pfPhotoData')">✕</span>` : ''}
+      </div>
+      <input type="file" id="pfPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoPick(this, 'pfPhoto', 'pfPhotoData')">
+      <textarea id="pfPhotoData" style="display:none">${product?.photo || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注</label>
+      <textarea class="form-input form-textarea" id="pfNote" placeholder="补充说明…">${escHtml(product?.note || '')}</textarea>
+    </div>
+  `, `
+    ${editId ? '<button class="btn btn-danger" id="pfDeleteBtn">删除商品</button>' : ''}
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" id="pfSaveBtn">保存</button>
+  `);
+
+  if (editId) {
+    $('#pfDeleteBtn').addEventListener('click', async () => {
+      const ok = await confirm('删除后将无法恢复，该商品相关的出入库记录仍会保留。', '删除商品');
+      if (!ok) return;
+      await dbDelete('products', editId);
+      closeModal();
+      showToast('已删除', 'success');
+      renderProducts({});
+    });
+  }
+
+  $('#pfSaveBtn').addEventListener('click', async () => {
+    const name = $('#pfName').value.trim();
+    const sku = $('#pfSku').value.trim();
+    const stock = parseInt($('#pfStock').value) || 0;
+    if (!name) { showToast('请输入商品名称'); return; }
+    if (!sku) { showToast('请输入SKU编码'); return; }
+
+    const data = {
+      name, sku,
+      brand: $('#pfBrand').value.trim(),
+      size: $('#pfSize').value.trim(),
+      color: $('#pfColor').value.trim(),
+      category: $('#pfCategory').value,
+      supplier: $('#pfSupplier').value,
+      stock: editId ? (product.stock || 0) : stock,
+      minStock: parseInt($('#pfMinStock').value) || null,
+      cost: parseFloat($('#pfCost').value) || null,
+      price: parseFloat($('#pfPrice').value) || null,
+      location: $('#pfLocation').value.trim(),
+      photo: $('#pfPhotoData').value || null,
+      note: $('#pfNote').value.trim(),
+      updatedAt: Date.now()
+    };
+    if (!editId) data.createdAt = Date.now();
+
+    try {
+      if (editId) data.id = editId;
+      else {
+        const existing = await dbGetByIndex('products', 'sku', sku);
+        if (existing.length > 0) { showToast('SKU编码已存在'); return; }
+      }
+      await dbPut('products', data);
+      closeModal();
+      showToast(editId ? '已更新' : '已添加', 'success');
+      if (currentPage === 'products') renderProducts({});
+      else if (currentPage === 'dashboard') renderDashboard();
+    } catch (err) {
+      showToast('保存失败：' + err.message);
+    }
+  });
+}
+
+// ============ Transactions ============
+async function renderTransactions({ productId } = {}) {
+  const main = $('#mainContent');
+  let transactions = await dbGetAll('transactions');
+  const products = await dbGetAll('products');
+
+  if (productId) {
+    transactions = transactions.filter(t => t.productId === productId);
+  }
+
+  transactions.sort((a, b) => b.createdAt - a.createdAt);
+
+  main.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-sm btn-secondary filter-btn active" data-filter="all">全部</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="in">入库</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="out">出库</button>
+    </div>
+    <div id="txList"></div>
+  `;
+
+  let activeFilter = 'all';
+
+  function renderList() {
+    let filtered = transactions;
+    if (activeFilter === 'in') filtered = transactions.filter(t => t.type === 'in');
+    else if (activeFilter === 'out') filtered = transactions.filter(t => t.type === 'out');
+
+    const list = $('#txList');
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>暂无记录</p></div>';
+      return;
+    }
+    list.innerHTML = filtered.map(t => {
+      const p = products.find(x => x.id === t.productId);
+      const isIn = t.type === 'in';
+      return `<div class="list-item" onclick="showTransactionDetail(${t.id})">
+        <div class="list-thumb" style="font-size:18px">${isIn ? '📥' : '📤'}</div>
+        <div class="list-info">
+          <div class="list-name">${escHtml(p?.name || '已删除商品')}</div>
+          <div class="list-meta">${fmtDate(t.createdAt)} · ${t.supplier || t.destination || ''}</div>
+        </div>
+        <div class="list-right">
+          <div class="count ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}${t.quantity}</div>
+          <div class="sub">${t.sku || ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  renderList();
+
+  $$('.filter-btn', main).forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.filter-btn', main).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderList();
+    });
+  });
+}
+
+async function showTransactionForm(type, presetProductId = null) {
+  const products = await dbGetAll('products');
+  const suppliers = await dbGetAll('suppliers');
+
+  const isIn = type === 'in';
+  const title = isIn ? '入库' : '出库';
+  const btnLabel = isIn ? '确认入库' : '确认出库';
+
+  openModal(title, `
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 选择商品</label>
+      <select class="form-input" id="tfProduct">
+        <option value="">请选择商品</option>
+        ${products.map(p => `<option value="${p.id}" ${p.id === presetProductId ? 'selected' : ''}>${escHtml(p.name)} (${p.sku || '无SKU'} · 库存${p.stock || 0})</option>`).join('')}
+      </select>
+      ${!isIn ? '<p style="font-size:11px;color:var(--text-secondary);margin-top:4px">当前库存将自动显示</p>' : ''}
+    </div>
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 数量</label>
+      <input class="form-input" id="tfQty" type="number" min="1" placeholder="请输入数量（双）">
+    </div>
+    <div class="form-group">
+      <label class="form-label">${isIn ? '供应商/来源' : '去向/客户'}</label>
+      ${isIn ? `
+        <select class="form-input" id="tfSupplier">
+          <option value="">请选择（可选）</option>
+          ${suppliers.map(s => `<option value="${escHtml(s.name)}">${escHtml(s.name)}</option>`).join('')}
+          <option value="__custom__">其他（手动输入）</option>
+        </select>
+        <input class="form-input" id="tfSupplierCustom" style="display:none;margin-top:8px" placeholder="请输入供应商名称">
+      ` : `
+        <input class="form-input" id="tfDestination" placeholder="例如：零售客户、批发等">
+      `}
+    </div>
+    <div class="form-group">
+      <label class="form-label">留档照片</label>
+      <div class="photo-pick" id="tfPhoto" onclick="document.getElementById('tfPhotoInput').click()">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span style="font-size:13px">点击拍照留档</span>
+      </div>
+      <input type="file" id="tfPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoPick(this, 'tfPhoto', 'tfPhotoData')">
+      <textarea id="tfPhotoData" style="display:none"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注</label>
+      <textarea class="form-input form-textarea" id="tfNote" placeholder="补充说明…"></textarea>
+    </div>
+    <div class="card" style="background:${isIn ? 'var(--success-light)' : 'var(--danger-light)'};margin-bottom:0">
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">${isIn ? '操作后库存将增加' : '操作后库存将减少'}</div>
+      <div style="font-size:13px">${isIn ? '入库数量将自动累加到当前库存' : '请确认库存充足后再操作出库'}</div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" id="tfSaveBtn" style="background:${isIn ? 'var(--success)' : 'var(--danger)'}">${btnLabel}</button>
+  `);
+
+  if (isIn) {
+    const supSelect = $('#tfSupplier');
+    const supCustom = $('#tfSupplierCustom');
+    supSelect.addEventListener('change', () => {
+      if (supSelect.value === '__custom__') {
+        supCustom.style.display = 'block';
+        supCustom.focus();
+      } else {
+        supCustom.style.display = 'none';
+      }
+    });
+  }
+
+  $('#tfSaveBtn').addEventListener('click', async () => {
+    const productId = parseInt($('#tfProduct').value);
+    const qty = parseInt($('#tfQty').value);
+    if (!productId) { showToast('请选择商品'); return; }
+    if (!qty || qty <= 0) { showToast('请输入有效数量'); return; }
+
+    const product = await dbGet('products', productId);
+    if (!product) { showToast('商品不存在'); return; }
+
+    if (!isIn && (product.stock || 0) < qty) {
+      showToast('库存不足，当前库存：' + (product.stock || 0));
+      return;
+    }
+
+    const supplier = isIn ? ($('#tfSupplier').value === '__custom__' ? $('#tfSupplierCustom').value.trim() : $('#tfSupplier').value) : '';
+    const destination = !isIn ? $('#tfDestination').value.trim() : '';
+
+    const tx = {
+      productId,
+      sku: product.sku,
+      type: isIn ? 'in' : 'out',
+      quantity: qty,
+      supplier: supplier || null,
+      destination: isIn ? null : (destination || null),
+      photo: $('#tfPhotoData').value || null,
+      note: $('#tfNote').value.trim() || null,
+      createdAt: Date.now()
+    };
+
+    product.stock = (product.stock || 0) + (isIn ? qty : -qty);
+    product.updatedAt = Date.now();
+
+    const txDB = db.transaction(['transactions', 'products'], 'readwrite');
+    const txStore = txDB.objectStore('transactions');
+    const pStore = txDB.objectStore('products');
+    txStore.add(tx);
+    pStore.put(product);
+
+    txDB.oncomplete = () => {
+      closeModal();
+      showToast(`${isIn ? '入库' : '出库'}成功`, 'success');
+      if (currentPage === 'dashboard') renderDashboard();
+      else if (currentPage === 'transactions') renderTransactions({});
+      else if (currentPage === 'products') renderProducts({});
+    };
+    txDB.onerror = () => { showToast('操作失败'); };
+  });
+}
+
+async function showTransactionDetail(id) {
+  const tx = await dbGet('transactions', id);
+  if (!tx) return;
+  const product = await dbGet('products', tx.productId);
+  const isIn = tx.type === 'in';
+
+  openModal(isIn ? '入库详情' : '出库详情', `
+    <div class="detail-section">
+      <div class="detail-field"><span class="key">商品</span><span class="val">${escHtml(product?.name || '已删除')}</span></div>
+      <div class="detail-field"><span class="key">SKU</span><span class="val">${escHtml(tx.sku || '-')}</span></div>
+      <div class="detail-field"><span class="key">类型</span><span class="val"><span class="tag ${isIn ? 'tag-in' : 'tag-out'}">${isIn ? '入库' : '出库'}</span></span></div>
+      <div class="detail-field"><span class="key">数量</span><span class="val" style="color:${isIn ? 'var(--success)' : 'var(--danger)'}">${isIn ? '+' : '-'}${tx.quantity} 双</span></div>
+      <div class="detail-field"><span class="key">${isIn ? '供应商' : '去向'}</span><span class="val">${escHtml(tx.supplier || tx.destination || '-')}</span></div>
+      <div class="detail-field"><span class="key">时间</span><span class="val">${fmtDate(tx.createdAt)}</span></div>
+      ${tx.note ? `<div class="detail-field"><span class="key">备注</span><span class="val">${escHtml(tx.note)}</span></div>` : ''}
+    </div>
+    ${tx.photo ? `<div style="margin-top:12px"><img src="${tx.photo}" alt="" style="width:100%;border-radius:var(--radius-sm)"></div>` : ''}
+  `, `<button class="btn btn-danger btn-block" id="txDeleteBtn">删除此记录</button>`);
+
+  $('#txDeleteBtn').addEventListener('click', async () => {
+    const ok = await confirm('删除后无法恢复，且库存不会自动回退。', '删除记录');
+    if (!ok) return;
+    await dbDelete('transactions', id);
+    closeModal();
+    showToast('已删除');
+    if (currentPage === 'transactions') renderTransactions({});
+  });
+}
+
+// ============ Settings ============
+async function renderSettings() {
+  const main = $('#mainContent');
+  const st = await dbGetAll('settings');
+  const getSetting = (key, def = '') => st.find(s => s.key === key)?.value || def;
+  const threshold = getSetting('lowStockThreshold', '10');
+  const products = await dbGetAll('products');
+  const cx = await dbGetAll('categories');
+  const sx = await dbGetAll('suppliers');
+
+  main.innerHTML = `
+    <div class="setting-section">
+      <h4>库存提醒</h4>
+      <div class="card">
+        <div class="setting-item" onclick="editThreshold()">
+          <div class="setting-icon icon-warn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">低库存提醒阈值</div>
+            <div class="setting-desc">库存低于 ${threshold} 双时提醒补充</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>分类管理</h4>
+      <div class="card">
+        ${cx.length === 0 ? '<div class="empty" style="padding:20px"><p>暂无分类</p></div>' : cx.map(c => `
+          <div class="setting-item">
+            <div class="setting-info"><div class="setting-name">${escHtml(c.name)}</div></div>
+            <button class="btn btn-sm btn-secondary" onclick="deleteCategory(${c.id},'${escHtml(c.name)}')">删除</button>
+          </div>
+        `).join('')}
+        <div class="setting-item" onclick="addCategory()" style="color:var(--accent)">
+          <div class="setting-icon" style="background:#FFF5ED;color:var(--accent)">+</div>
+          <div class="setting-info"><div class="setting-name">添加分类</div></div>
+          <span class="setting-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>供应商管理</h4>
+      <div class="card">
+        ${sx.length === 0 ? '<div class="empty" style="padding:20px"><p>暂无供应商</p></div>' : sx.map(s => `
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-name">${escHtml(s.name)}</div>
+              <div class="setting-desc">${escHtml(s.contact || '')}${s.phone ? ' · ' + s.phone : ''}</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-secondary" onclick="editSupplier(${s.id})">编辑</button>
+              <button class="btn btn-sm btn-secondary" style="color:var(--danger)" onclick="deleteSupplier(${s.id},'${escHtml(s.name)}')">删除</button>
+            </div>
+          </div>
+        `).join('')}
+        <div class="setting-item" onclick="addSupplier()" style="color:var(--accent)">
+          <div class="setting-icon" style="background:#FFF5ED;color:var(--accent)">+</div>
+          <div class="setting-info"><div class="setting-name">添加供应商</div></div>
+          <span class="setting-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>数据管理</h4>
+      <div class="card">
+        <div class="setting-item" onclick="exportExcel()">
+          <div class="setting-icon" style="background:#ECFDF5;color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">导出数据为 Excel</div>
+            <div class="setting-desc">导出商品列表和出入库记录</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
+        <div class="setting-item" onclick="showImportExcel()">
+          <div class="setting-icon" style="background:#FFF5ED;color:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">从 Excel 导入</div>
+            <div class="setting-desc">批量导入商品数据（支持 .xlsx/.csv）</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
+        <div class="setting-item" onclick="exportBackup()">
+          <div class="setting-icon" style="background:#FFFBEB;color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">数据备份</div>
+            <div class="setting-desc">导出全部数据为 JSON 备份文件</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
+        <div class="setting-item" onclick="restoreBackup()">
+          <div class="setting-icon" style="background:#FEF2F2;color:var(--danger)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">恢复备份</div>
+            <div class="setting-desc">从 JSON 备份文件恢复数据</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>关于</h4>
+      <div class="card">
+        <div class="setting-item" style="cursor:default">
+          <div class="setting-info">
+            <div class="setting-name">靴履云仓</div>
+            <div class="setting-desc">版本 1.0 · 共 ${products.length} 件商品</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function editThreshold() {
+  const st = await dbGetAll('settings');
+  const val = st.find(s => s.key === 'lowStockThreshold')?.value || '10';
+  openModal('低库存提醒阈值', `
+    <div class="form-group">
+      <label class="form-label">当库存低于此数量时提醒</label>
+      <input class="form-input" id="thresholdInput" type="number" min="0" value="${val}">
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveThreshold()">保存</button>
+  `);
+}
+
+async function saveThreshold() {
+  const val = parseInt($('#thresholdInput').value);
+  if (isNaN(val) || val < 0) { showToast('请输入有效数值'); return; }
+  await dbPut('settings', { key: 'lowStockThreshold', value: String(val) });
+  closeModal();
+  showToast('已保存', 'success');
+  renderSettings();
+}
+
+async function addCategory() {
+  openModal('添加分类', `
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 分类名称</label>
+      <input class="form-input" id="catName" placeholder="例如：运动鞋、皮鞋、凉鞋">
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveCategory()">保存</button>
+  `);
+}
+
+async function saveCategory() {
+  const name = $('#catName').value.trim();
+  if (!name) { showToast('请输入分类名称'); return; }
+  try {
+    const existing = await dbGetByIndex('categories', 'name', name);
+    if (existing.length > 0) { showToast('该分类已存在'); return; }
+  } catch (e) {}
+  await dbPut('categories', { name });
+  closeModal();
+  showToast('已添加', 'success');
+  renderSettings();
+}
+
+async function deleteCategory(id, name) {
+  const ok = await confirm(`确定删除分类「${name}」吗？`, '删除分类');
+  if (!ok) return;
+  await dbDelete('categories', id);
+  showToast('已删除', 'success');
+  renderSettings();
+}
+
+async function addSupplier() {
+  openModal('添加供应商', `
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 供应商名称</label>
+      <input class="form-input" id="supName" placeholder="请输入供应商名称">
+    </div>
+    <div class="form-group">
+      <label class="form-label">联系人</label>
+      <input class="form-input" id="supContact">
+    </div>
+    <div class="form-group">
+      <label class="form-label">电话</label>
+      <input class="form-input" id="supPhone">
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注</label>
+      <textarea class="form-input form-textarea" id="supNote"></textarea>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveSupplier()">保存</button>
+  `);
+}
+
+async function saveSupplier(editId = null) {
+  const name = $('#supName').value.trim();
+  if (!name) { showToast('请输入供应商名称'); return; }
+  const data = { name, contact: $('#supContact').value.trim(), phone: $('#supPhone').value.trim(), note: $('#supNote').value.trim() };
+  if (editId) data.id = editId;
+  else {
+    try {
+      const existing = await dbGetByIndex('suppliers', 'name', name);
+      if (existing.length > 0) { showToast('该供应商已存在'); return; }
+    } catch (e) {}
+  }
+  await dbPut('suppliers', data);
+  closeModal();
+  showToast(editId ? '已更新' : '已添加', 'success');
+  renderSettings();
+}
+
+async function editSupplier(id) {
+  const s = await dbGet('suppliers', id);
+  if (!s) return;
+  openModal('编辑供应商', `
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 供应商名称</label>
+      <input class="form-input" id="supName" value="${escHtml(s.name)}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">联系人</label>
+      <input class="form-input" id="supContact" value="${escHtml(s.contact || '')}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">电话</label>
+      <input class="form-input" id="supPhone" value="${escHtml(s.phone || '')}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注</label>
+      <textarea class="form-input form-textarea" id="supNote">${escHtml(s.note || '')}</textarea>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveSupplier(${id})">保存</button>
+  `);
+}
+
+async function deleteSupplier(id, name) {
+  const ok = await confirm(`确定删除供应商「${name}」吗？`, '删除供应商');
+  if (!ok) return;
+  await dbDelete('suppliers', id);
+  showToast('已删除', 'success');
+  renderSettings();
+}
+
+// ============ Excel Export ============
+async function exportExcel() {
+  const products = await dbGetAll('products');
+  const transactions = await dbGetAll('transactions');
+
+  if (products.length === 0 && transactions.length === 0) {
+    showToast('暂无数据可导出');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+
+  const pData = products.map(p => ({
+    'SKU': p.sku || '',
+    '商品名称': p.name || '',
+    '品牌': p.brand || '',
+    '尺码': p.size || '',
+    '颜色': p.color || '',
+    '分类': p.category || '',
+    '供应商': p.supplier || '',
+    '库存': p.stock || 0,
+    '最低库存': p.minStock || '',
+    '成本价': p.cost || '',
+    '零售价': p.price || '',
+    '库位': p.location || '',
+    '备注': p.note || '',
+    '创建时间': p.createdAt ? fmtDate(p.createdAt) : '',
+    '更新时间': p.updatedAt ? fmtDate(p.updatedAt) : ''
+  }));
+  if (pData.length > 0) {
+    const pws = XLSX.utils.json_to_sheet(pData);
+    const pcols = Object.keys(pData[0]).map((k, i) => ({ wch: Math.max(k.length * 2, 12) }));
+    pws['!cols'] = pcols;
+    XLSX.utils.book_append_sheet(wb, pws, '商品列表');
+  }
+
+  const tData = transactions.map(t => {
+    const p = products.find(x => x.id === t.productId);
+    return {
+      '类型': t.type === 'in' ? '入库' : '出库',
+      '商品名称': p?.name || '',
+      'SKU': t.sku || '',
+      '数量': t.quantity,
+      '供应商/去向': t.supplier || t.destination || '',
+      '备注': t.note || '',
+      '时间': fmtDate(t.createdAt)
+    };
+  });
+  if (tData.length > 0) {
+    const tws = XLSX.utils.json_to_sheet(tData);
+    const tcols = Object.keys(tData[0]).map((k, i) => ({ wch: Math.max(k.length * 2, 12) }));
+    tws['!cols'] = tcols;
+    XLSX.utils.book_append_sheet(wb, tws, '出入库记录');
+  }
+
+  XLSX.writeFile(wb, `靴履云仓_数据导出_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('导出成功', 'success');
+}
+
+// ============ Excel Import ============
+async function showImportExcel() {
+  openModal('从 Excel 导入', `
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6">导入 Excel 文件批量添加商品。文件需包含以下列：<b>商品名称、SKU</b>（必填），以及品牌、尺码、颜色、分类、供应商、库存、成本价、零售价、库位、备注（选填）。</p>
+    <div class="card" style="background:var(--warning-light);margin-bottom:12px">
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">⚠ 注意事项</div>
+      <div style="font-size:12px;line-height:1.5">- 第一行将被视为表头<br>- SKU重复的记录将被跳过<br>- 库存列如不填则默认为0</div>
+    </div>
+    <button class="btn btn-secondary btn-block" onclick="downloadTemplate()">下载导入模板</button>
+    <button class="btn btn-primary btn-block" style="margin-top:8px" onclick="document.getElementById('excelFileInput').click()">选择 Excel 文件导入</button>
+    <div id="importResult" style="margin-top:12px"></div>
+  `, `<button class="btn btn-secondary" onclick="closeModal()">关闭</button>`);
+}
+
+function downloadTemplate() {
+  const wb = XLSX.utils.book_new();
+  const data = [{
+    '商品名称': '示例运动鞋',
+    'SKU': 'SPORT-001',
+    '品牌': '示例品牌',
+    '尺码': '42',
+    '颜色': '黑色',
+    '分类': '运动鞋',
+    '供应商': '示例供应商',
+    '库存': 100,
+    '成本价': 89.00,
+    '零售价': 299.00,
+    '库位': 'A-01-03',
+    '备注': '这是一条示例数据'
+  }];
+  const ws = XLSX.utils.json_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, '商品导入模板');
+  XLSX.writeFile(wb, '靴履云仓_导入模板.xlsx');
+  showToast('模板已下载', 'success');
+}
+
+$('#excelFileInput').addEventListener('change', async function() {
+  const file = this.files[0];
+  if (!file) return;
+  this.value = '';
+
+  try {
+    const data = await readFileAsBuffer(file);
+    const wb = XLSX.read(data, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    if (rows.length === 0) { showToast('文件中没有数据'); return; }
+
+    let imported = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (const row of rows) {
+      const name = (row['商品名称'] || row['名称'] || '').toString().trim();
+      const sku = (row['SKU'] || row['sku'] || row['货号'] || '').toString().trim();
+      if (!name || !sku) { skipped++; errors.push(`缺少商品名称或SKU (行数据: ${JSON.stringify(row).slice(0,60)})`); continue; }
+
+      const existing = await dbGetByIndex('products', 'sku', sku);
+      if (existing.length > 0) { skipped++; continue; }
+
+      await dbPut('products', {
+        name,
+        sku,
+        brand: (row['品牌'] || '').toString().trim(),
+        size: (row['尺码'] || '').toString().trim(),
+        color: (row['颜色'] || '').toString().trim(),
+        category: (row['分类'] || '').toString().trim(),
+        supplier: (row['供应商'] || '').toString().trim(),
+        stock: parseInt(row['库存']) || 0,
+        cost: parseFloat(row['成本价']) || null,
+        price: parseFloat(row['零售价']) || null,
+        location: (row['库位'] || '').toString().trim(),
+        note: (row['备注'] || '').toString().trim(),
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+      imported++;
+    }
+
+    const resultDiv = $('#importResult');
+    resultDiv.innerHTML = `
+      <div class="card" style="background:${imported > 0 ? 'var(--success-light)' : 'var(--warning-light)'}">
+        <div style="font-size:14px;font-weight:500">导入完成</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">成功导入 <b>${imported}</b> 条，跳过 <b>${skipped}</b> 条</div>
+        ${errors.slice(0, 3).map(e => `<div style="font-size:11px;color:var(--danger);margin-top:4px">${e}</div>`).join('')}
+      </div>
+    `;
+    if (imported > 0) {
+      showToast(`成功导入 ${imported} 条商品`, 'success');
+      if (currentPage === 'products') renderProducts({});
+      if (currentPage === 'dashboard') renderDashboard();
+    }
+  } catch (err) {
+    showToast('读取文件失败：' + err.message);
+  }
+});
+
+function readFileAsBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(new Uint8Array(reader.result));
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ============ Backup & Restore ============
+async function exportBackup() {
+  const data = {
+    version: '1.0',
+    exportedAt: Date.now(),
+    products: await dbGetAll('products'),
+    transactions: await dbGetAll('transactions'),
+    categories: await dbGetAll('categories'),
+    suppliers: await dbGetAll('suppliers'),
+    settings: await dbGetAll('settings')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `靴履云仓_备份_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('备份已下载', 'success');
+}
+
+async function restoreBackup() {
+  const ok = await confirm('恢复备份将覆盖当前所有数据（商品、记录、分类、供应商、设置）。此操作不可撤销，建议先导出备份。', '恢复备份');
+  if (!ok) return;
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async function() {
+    const file = this.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.products || !data.transactions) { showToast('备份文件格式不正确'); return; }
+
+      await dbClear('products');
+      await dbClear('transactions');
+      await dbClear('categories');
+      await dbClear('suppliers');
+      await dbClear('settings');
+
+      const tx = db.transaction(['products', 'transactions', 'categories', 'suppliers', 'settings'], 'readwrite');
+      for (const p of data.products) tx.objectStore('products').put(p);
+      for (const t of data.transactions) tx.objectStore('transactions').put(t);
+      for (const c of (data.categories || [])) tx.objectStore('categories').put(c);
+      for (const s of (data.suppliers || [])) tx.objectStore('suppliers').put(s);
+      for (const s of (data.settings || [])) tx.objectStore('settings').put(s);
+
+      tx.oncomplete = () => {
+        showToast('数据已恢复', 'success');
+        navigateTo('dashboard');
+      };
+      tx.onerror = () => showToast('恢复失败');
+    } catch (err) {
+      showToast('读取备份文件失败：' + err.message);
+    }
+  };
+  input.click();
+}
+
+// ============ Photo handling ============
+function handlePhotoPick(input, pickerId, dataId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const base64 = reader.result;
+    $(`#${dataId}`).value = base64;
+    const picker = $(`#${pickerId}`);
+    picker.classList.add('has-photo');
+    picker.innerHTML = `<img src="${base64}" alt=""><span class="photo-remove" onclick="event.stopPropagation();clearPhoto('${pickerId}','${dataId}')">✕</span>`;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function clearPhoto(pickerId, dataId) {
+  $(`#${dataId}`).value = '';
+  const picker = $(`#${pickerId}`);
+  picker.classList.remove('has-photo');
+  picker.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:13px">点击拍照或选择图片</span>`;
+}
+
+// ============ HTML escape ============
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============ Init ============
+async function init() {
+  try {
+    await openDB();
+    navigateTo('dashboard');
+
+    window.addEventListener('online', () => showToast('网络已连接', 'success'));
+    window.addEventListener('offline', () => showToast('已离线，数据保存在本地'));
+  } catch (err) {
+    $('#mainContent').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠</div>
+        <h3>初始化失败</h3>
+        <p>${err.message}。请尝试刷新页面。</p>
+      </div>
+    `;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
