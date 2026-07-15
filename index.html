@@ -1174,10 +1174,16 @@ async function showTransactionForm(type, presetProductId = null) {
   openModal(title, `
     <div class="form-group">
       <label class="form-label"><span class="req">*</span> 选择商品</label>
-      <select class="form-input" id="tfProduct">
+      <div style="position:relative">
+        <input class="form-input" id="tfSearchProduct" placeholder="搜索商品名称或SKU..." style="margin-bottom:8px" autocomplete="off">
+        <div id="tfProductList" style="max-height:200px;overflow-y:auto;background:var(--bg);border-radius:var(--radius-sm);display:none"></div>
+      </div>
+      <select class="form-input" id="tfProduct" style="display:none">
         <option value="">请选择商品</option>
         ${products.map(p => `<option value="${p.id}" ${p.id === presetProductId ? 'selected' : ''}>${escHtml(p.name)} (${p.sku || '无SKU'})</option>`).join('')}
       </select>
+      <input type="hidden" id="tfSelectedProductId" value="${presetProductId || ''}">
+      ${presetProductId ? `<div style="font-size:13px;color:var(--accent);margin-top:4px" id="tfSelectedLabel">已选：${escHtml(products.find(p=>p.id===presetProductId)?.name || '')}</div>` : `<div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="tfSelectedLabel">未选择</div>`}
     </div>
     <div class="form-group variant-picker" id="tfVariantPicker" style="display:none">
       <label class="form-label"><span class="req">*</span> 选择尺码</label>
@@ -1225,6 +1231,70 @@ async function showTransactionForm(type, presetProductId = null) {
   let selectedVariantSize = null;
   let selectedVariantStock = 0;
 
+  // Product search functionality
+  function filterProducts(query) {
+    const q = query.toLowerCase();
+    const list = $('#tfProductList');
+    const filtered = products.filter(p =>
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.sku || '').toLowerCase().includes(q) ||
+      (p.brand || '').toLowerCase().includes(q)
+    );
+    if (filtered.length === 0) {
+      list.style.display = 'block';
+      list.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-secondary);font-size:13px">未找到匹配商品</div>';
+      return;
+    }
+    list.style.display = 'block';
+    list.innerHTML = filtered.slice(0, 30).map(p => `
+      <div class="list-item" style="margin:0;padding:10px 12px;cursor:pointer" onclick="void(0)">
+        <div class="list-info">
+          <div class="list-name">${escHtml(p.name)}</div>
+          <div class="list-meta">${escHtml(p.sku)} · ${p.brand || ''}</div>
+        </div>
+      </div>
+    `).join('');
+
+    // Bind click handlers
+    list.querySelectorAll('.list-item').forEach((item, i) => {
+      item.addEventListener('click', () => {
+        const p = filtered[i];
+        $('#tfSelectedProductId').value = p.id;
+        $('#tfSearchProduct').value = p.name;
+        $('#tfSelectedLabel').innerHTML = '已选：' + escHtml(p.name);
+        list.style.display = 'none';
+        loadVariants(p.id);
+      });
+    });
+  }
+
+  $('#tfSearchProduct').addEventListener('input', function() {
+    const v = this.value.trim();
+    if (v.length > 0) {
+      filterProducts(v);
+    } else {
+      $('#tfProductList').style.display = 'none';
+      // If user cleared search without selecting, clear selection
+      $('#tfSelectedProductId').value = '';
+      $('#tfSelectedLabel').innerHTML = '未选择';
+      $('#tfVariantPicker').style.display = 'none';
+      $('#tfQtyGroup').style.display = 'none';
+    }
+  });
+
+  $('#tfSearchProduct').addEventListener('focus', function() {
+    if (this.value.trim().length > 0) filterProducts(this.value.trim());
+  });
+
+  // Close search dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#tfSearchProduct') && !e.target.closest('#tfProductList')) {
+      $('#tfProductList').style.display = 'none';
+      const searchInput = $('#tfSearchProduct');
+      if (searchInput && !$('#tfSelectedProductId').value) searchInput.value = '';
+    }
+  });
+
   async function loadVariants(productId) {
     const variants = await getProductVariants(productId);
     const chips = $('#tfVariantChips');
@@ -1264,18 +1334,14 @@ async function showTransactionForm(type, presetProductId = null) {
     });
   }
 
-  const productSelect = $('#tfProduct');
-  productSelect.addEventListener('change', () => {
-    const pid = parseInt(productSelect.value);
-    if (pid) loadVariants(pid);
-    else {
-      $('#tfVariantPicker').style.display = 'none';
-      $('#tfQtyGroup').style.display = 'none';
-    }
-  });
-
+  // Preload variants if a product is preset
   if (presetProductId) {
-    productSelect.value = presetProductId;
+    $('#tfSelectedProductId').value = presetProductId;
+    const presetProduct = products.find(p => p.id === presetProductId);
+    if (presetProduct) {
+      $('#tfSearchProduct').value = presetProduct.name;
+      $('#tfSelectedLabel').innerHTML = '已选：' + escHtml(presetProduct.name);
+    }
     loadVariants(presetProductId);
   }
 
@@ -1289,7 +1355,7 @@ async function showTransactionForm(type, presetProductId = null) {
   }
 
   $('#tfSaveBtn').addEventListener('click', async () => {
-    const productId = parseInt(productSelect.value);
+    const productId = parseInt($('#tfSelectedProductId').value);
     const qty = parseInt($('#tfQty').value);
     if (!productId) { showToast('请选择商品'); return; }
     if (!selectedVariantId) { showToast('请选择尺码'); return; }
