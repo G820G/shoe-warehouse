@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#1A1D23">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="靴履云仓">
 <title>靴履云仓</title>
 <link rel="manifest" href="./manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -42,7 +43,6 @@ button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font:inherit;color:inherit}
 img{max-width:100%;display:block}
 
-/* Header */
 .header{position:sticky;top:0;z-index:100;background:var(--primary);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .header h1{font-size:17px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
 .header-actions{display:flex;gap:8px}
@@ -53,17 +53,14 @@ img{max-width:100%;display:block}
 .search-bar input::placeholder{color:rgba(255,255,255,.4)}
 .search-bar svg{flex-shrink:0;opacity:.5}
 
-/* Main content */
 .main{padding:16px;padding-bottom:calc(80px + var(--safe-bottom))}
 
-/* Cards */
 .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .card-title{font-size:14px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
 .card-value{font-size:28px;font-weight:700;font-family:var(--font-mono);letter-spacing:-.02em}
 .card-sub{font-size:12px;color:var(--text-secondary);margin-top:4px}
 
-/* Stat row */
 .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .stat-row.three{grid-template-columns:1fr 1fr 1fr}
 .stat-card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
@@ -72,21 +69,24 @@ img{max-width:100%;display:block}
 .stat-card .stat-label{font-size:12px;color:var(--text-secondary);margin-top:2px}
 .stat-card .stat-trend{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px}
 
-/* Icon backgrounds */
 .icon-in{background:#ECFDF5;color:var(--success)}
 .icon-out{background:#FEF2F2;color:var(--danger)}
 .icon-store{background:#FFF5ED;color:var(--accent)}
 .icon-warn{background:#FFFBEB;color:var(--warning)}
 
-/* Alert row */
-.alert-item{display:flex;align-items:center;padding:12px;background:var(--warning-light);border-radius:var(--radius-sm);margin-bottom:8px;gap:10px}
+.install-banner{background:var(--accent);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;border-radius:var(--radius);box-shadow:var(--shadow-md);display:none}
+.install-banner.show{display:flex}
+.install-banner p{font-size:13px;line-height:1.4;flex:1;min-width:0}
+.install-banner .btn{border:2px solid #fff;color:#fff;background:transparent;font-weight:600;flex-shrink:0}
+
+.alert-item{display:flex;align-items:center;padding:12px;background:var(--warning-light);border-radius:var(--radius-sm);margin-bottom:8px;gap:10px;cursor:pointer}
+.alert-item:active{background:#fef3c7}
 .alert-item .alert-dot{width:8px;height:8px;border-radius:50%;background:var(--warning);flex-shrink:0}
 .alert-item .alert-info{flex:1;min-width:0}
 .alert-item .alert-name{font-size:14px;font-weight:500}
 .alert-item .alert-meta{font-size:12px;color:var(--text-secondary)}
 .alert-item .alert-stock{font-size:14px;font-weight:600;color:var(--warning)}
 
-/* List items */
 .list-item{display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;cursor:pointer;transition:background .1s}
 .list-item:active{background:rgba(0,0,0,.02);margin:0 -16px;padding:14px 16px}
 .list-item:last-child{border-bottom:none}
@@ -94,27 +94,24 @@ img{max-width:100%;display:block}
 .list-thumb img{width:100%;height:100%;object-fit:cover}
 .list-info{flex:1;min-width:0}
 .list-name{font-size:15px;font-weight:500;line-height:1.3}
-.list-meta{font-size:12px;color:var(--text-secondary);margin-top:2px;display:flex;gap:8px}
+.list-meta{font-size:12px;color:var(--text-secondary);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
 .list-right{text-align:right;flex-shrink:0}
 .list-right .count{font-size:16px;font-weight:600;font-family:var(--font-mono)}
 .list-right .sub{font-size:11px;color:var(--text-secondary)}
 .list-right .in{color:var(--success)}
 .list-right .out{color:var(--danger)}
 
-/* Empty state */
 .empty{text-align:center;padding:48px 24px;color:var(--text-secondary)}
 .empty-icon{font-size:48px;margin-bottom:12px;opacity:.6}
 .empty h3{font-size:16px;margin-bottom:6px;color:var(--text)}
 .empty p{font-size:13px;line-height:1.5}
 .empty .btn{margin-top:16px}
 
-/* Bottom nav */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:var(--safe-bottom)}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 6px;font-size:10px;color:var(--text-secondary);gap:3px;transition:color .15s;position:relative}
 .nav-item.active{color:var(--accent)}
 .nav-item svg{width:22px;height:22px}
 
-/* FAB */
 .fab{position:fixed;bottom:calc(64px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:101;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(232,112,10,.4)}
 .fab:active{transform:translateX(-50%) scale(.95)}
 .fab-menu{position:fixed;bottom:calc(120px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;opacity:0;transition:opacity .2s}
@@ -125,17 +122,15 @@ img{max-width:100%;display:block}
 .fab-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:98;opacity:0;pointer-events:none;transition:opacity .2s}
 .fab-overlay.open{opacity:1;pointer-events:auto}
 
-/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;transition:all .15s}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:active{background:#d06509}
 .btn-secondary{background:var(--bg);color:var(--text)}
 .btn-secondary:active{background:var(--border)}
 .btn-danger{background:var(--danger);color:#fff}
-.btn-sm{padding:6px 14px;font-size:13px;border-radius:6px}
+.btn-sm{padding:6px 14px;font-size:13px;border-radius:6px;font-weight:500}
 .btn-block{display:flex;width:100%}
 
-/* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.open{opacity:1;pointer-events:auto}
 .modal{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:480px;max-height:90dvh;display:flex;flex-direction:column;transform:translateY(20px);transition:transform .25s}
@@ -147,7 +142,6 @@ img{max-width:100%;display:block}
 .modal-footer{padding:16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
 .modal-footer .btn{flex:1}
 
-/* Form */
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
 .form-label .req{color:var(--danger)}
@@ -161,18 +155,36 @@ img{max-width:100%;display:block}
 .photo-pick.has-photo{border-style:solid}
 .photo-pick .photo-remove{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center;z-index:1;font-size:14px}
 
-/* Tags/Chips */
 .tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
 .tag-in{background:var(--success-light);color:var(--success)}
 .tag-out{background:var(--danger-light);color:var(--danger)}
 .tag-warn{background:var(--warning-light);color:var(--warning)}
 
-/* Toast */
+/* Variant table */
+.variant-table{width:100%;border-collapse:collapse;font-size:14px}
+.variant-table th{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;font-weight:600;padding:8px;text-align:left;border-bottom:2px solid var(--border)}
+.variant-table td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.variant-table tr:last-child td{border-bottom:none}
+.variant-table .v-stock{font-weight:600;font-family:var(--font-mono)}
+.variant-table .v-low{color:var(--warning)}
+.variant-table .v-zero{color:var(--danger)}
+
+/* Size chips */
+.size-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.size-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--bg);border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.size-chip.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.size-chip .chip-stock{font-size:11px;color:var(--text-secondary);margin-left:2px}
+.size-chip.selected .chip-stock{color:var(--accent)}
+
+/* Variant picker in transaction */
+.variant-picker .size-chip{min-width:56px;justify-content:center;flex-direction:column;gap:2px;padding:10px 14px}
+.variant-picker .size-chip .chip-size{font-size:18px;font-weight:700;font-family:var(--font-mono)}
+.variant-picker .size-chip .chip-qty{font-size:11px;color:var(--text-secondary)}
+
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120px);z-index:300;background:var(--primary);color:#fff;padding:12px 20px;border-radius:32px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);transition:transform .3s ease;pointer-events:none;max-width:90%;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{background:var(--success)}
 
-/* Confirm dialog */
 .confirm-overlay{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px}
 .confirm-overlay.open{opacity:1;pointer-events:auto}
 .confirm-box{background:var(--card);border-radius:var(--radius);padding:24px;width:100%;max-width:320px;text-align:center}
@@ -181,7 +193,6 @@ img{max-width:100%;display:block}
 .confirm-actions{display:flex;gap:10px}
 .confirm-actions .btn{flex:1}
 
-/* Product detail */
 .detail-header{position:relative;background:var(--primary);padding:24px 16px 32px;color:#fff}
 .detail-header .back-btn{position:absolute;top:12px;left:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center}
 .detail-photo{width:80px;height:80px;border-radius:var(--radius-sm);background:rgba(255,255,255,.1);margin-bottom:12px;overflow:hidden}
@@ -197,10 +208,9 @@ img{max-width:100%;display:block}
 .detail-field .key{color:var(--text-secondary)}
 .detail-field .val{font-weight:500}
 
-/* Settings card */
 .setting-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;cursor:pointer}
 .setting-item:last-child{border-bottom:none}
-.setting-item .setting-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.setting-item .setting-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .setting-item .setting-info{flex:1;min-width:0}
 .setting-item .setting-name{font-size:14px;font-weight:500}
 .setting-item .setting-desc{font-size:12px;color:var(--text-secondary);margin-top:1px}
@@ -208,18 +218,23 @@ img{max-width:100%;display:block}
 .setting-section{margin-bottom:20px}
 .setting-section h4{font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding:0 4px}
 
-/* File input */
+.qty-stepper{display:inline-flex;align-items:center;gap:0;border-radius:var(--radius-sm);overflow:hidden}
+.qty-stepper button{width:36px;height:36px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600}
+.qty-stepper button:active{background:var(--border)}
+.qty-stepper input{width:50px;height:36px;text-align:center;border:none;background:var(--card);font-size:15px;font-weight:600;font-family:var(--font-mono);-moz-appearance:textfield}
+.qty-stepper input::-webkit-outer-spin-button,.qty-stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.variant-input-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.variant-input-row:last-child{border-bottom:none}
+.variant-input-row .vi-size{width:60px;text-align:center;font-weight:600;font-family:var(--font-mono)}
+
 .file-input{display:none}
 
-/* Pulsing dot animation */
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .pulse{animation:pulse 2s ease infinite}
 
-/* Scrollbar */
 ::-webkit-scrollbar{width:0}
 
-/* Uitlity */
-.flex-center{display:flex;align-items:center;justify-content:center}
 .text-secondary{color:var(--text-secondary)}
 .text-sm{font-size:13px}
 .text-xs{font-size:11px}
@@ -227,6 +242,7 @@ img{max-width:100%;display:block}
 .mb-2{margin-bottom:8px}
 .gap-1{gap:4px}
 .gap-2{gap:8px}
+.bold{font-weight:600}
 
 @media (min-width:481px){
   .modal{border-radius:var(--radius);max-height:80dvh}
@@ -235,7 +251,6 @@ img{max-width:100%;display:block}
 </head>
 <body>
 
-<!-- Header -->
 <header class="header" id="appHeader">
   <div class="search-bar" id="searchBar" style="display:none">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -249,10 +264,13 @@ img{max-width:100%;display:block}
   </div>
 </header>
 
-<!-- Main Content -->
-<main class="main" id="mainContent"></main>
+<main class="main" id="mainContent">
+  <div class="install-banner" id="installBanner">
+    <p>安装到手机桌面，使用更方便</p>
+    <button class="btn btn-sm" id="installBtn">安装</button>
+  </div>
+</main>
 
-<!-- Bottom Nav -->
 <nav class="nav">
   <button class="nav-item active" data-page="dashboard">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -272,7 +290,6 @@ img{max-width:100%;display:block}
   </button>
 </nav>
 
-<!-- FAB -->
 <button class="fab" id="fabBtn" aria-label="快捷操作">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
@@ -292,7 +309,6 @@ img{max-width:100%;display:block}
 </div>
 <div class="fab-overlay" id="fabOverlay"></div>
 
-<!-- Modal container -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" id="modalBox">
     <div class="modal-header">
@@ -319,11 +335,12 @@ img{max-width:100%;display:block}
 
 <div class="toast" id="toast"></div>
 <input type="file" class="file-input" id="excelFileInput" accept=".xlsx,.xls,.csv">
+<input type="file" class="file-input" id="restoreFileInput" accept=".json">
 
 <script>
-// ============ IndexedDB Layer ============
+// ============ IndexedDB Layer (v2 with variants) ============
 const DB_NAME = 'ShoeWarehouseDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 let db = null;
 
 function openDB() {
@@ -331,33 +348,66 @@ function openDB() {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e) => {
       const d = e.target.result;
-      if (!d.objectStoreNames.contains('products')) {
+      const oldVersion = e.oldVersion;
+
+      if (oldVersion < 1) {
         const ps = d.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
         ps.createIndex('sku', 'sku', { unique: true });
         ps.createIndex('category', 'category');
         ps.createIndex('name', 'name');
-      }
-      if (!d.objectStoreNames.contains('transactions')) {
         const ts = d.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
         ts.createIndex('productId', 'productId');
         ts.createIndex('type', 'type');
         ts.createIndex('createdAt', 'createdAt');
-      }
-      if (!d.objectStoreNames.contains('categories')) {
         const cs = d.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
         cs.createIndex('name', 'name', { unique: true });
-      }
-      if (!d.objectStoreNames.contains('suppliers')) {
         const ss = d.createObjectStore('suppliers', { keyPath: 'id', autoIncrement: true });
         ss.createIndex('name', 'name', { unique: true });
+        const sts = d.createObjectStore('settings', { keyPath: 'key' });
       }
-      if (!d.objectStoreNames.contains('settings')) {
-        d.createObjectStore('settings', { keyPath: 'key' });
+
+      if (oldVersion < 2) {
+        if (!d.objectStoreNames.contains('product_variants')) {
+          const vs = d.createObjectStore('product_variants', { keyPath: 'id', autoIncrement: true });
+          vs.createIndex('productId', 'productId');
+          vs.createIndex('size', 'size');
+        }
+        // Migrate old transactions: add variantId/size columns are implicit (no-op, just making sure store exists)
       }
     };
     req.onsuccess = (e) => { db = e.target.result; resolve(db); };
     req.onerror = () => reject(req.error);
   });
+}
+
+// After DB open, migrate old product data if needed
+async function migrateOldData() {
+  try {
+    const products = await dbGetAll('products');
+    let migrated = 0;
+    for (const p of products) {
+      const existing = await dbGetByIndex('product_variants', 'productId', p.id);
+      if (existing.length === 0 && (p.size || p.stock)) {
+        // This is old data — create a variant from the product's size field
+        await dbPut('product_variants', {
+          productId: p.id,
+          size: p.size || '通用',
+          stock: p.stock || 0,
+          createdAt: p.createdAt || Date.now()
+        });
+        migrated++;
+      }
+      // Clean up old fields
+      if (p.size !== undefined || p.stock !== undefined) {
+        delete p.size;
+        delete p.stock;
+        await dbPut('products', p);
+      }
+    }
+    if (migrated > 0) console.log(`Migrated ${migrated} products to variant model`);
+  } catch (e) {
+    console.warn('Migration error (non-fatal):', e);
+  }
 }
 
 function dbPut(storeName, data) {
@@ -415,42 +465,39 @@ function dbGetByIndex(storeName, indexName, value) {
   });
 }
 
-// ============ Service Worker Registration ============
-if ('serviceWorker' in navigator) {
-  const swCode = `
-const CACHE = 'shoe-warehouse-v1';
-const URLS = ['/'];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS)).then(() => self.skipWaiting()));
-});
-
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
-});
-
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
-    if (res.ok) { const clone = res.clone(); caches.open(CACHE).then(c => c.put(e.request, clone)); }
-    return res;
-  })));
-});
-`;
-  const blob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+// ============ Helpers ============
+async function getProductVariants(productId) {
+  const variants = await dbGetByIndex('product_variants', 'productId', productId);
+  return variants.sort((a, b) => {
+    const na = parseFloat(a.size), nb = parseFloat(b.size);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return String(a.size).localeCompare(String(b.size));
+  });
 }
 
-// ============ Helpers ============
+async function getProductStock(productId) {
+  const variants = await dbGetByIndex('product_variants', 'productId', productId);
+  return variants.reduce((s, v) => s + (v.stock || 0), 0);
+}
+
+async function getProductLowStockVariants(productId, threshold) {
+  const variants = await dbGetByIndex('product_variants', 'productId', productId);
+  return variants.filter(v => (v.stock || 0) <= threshold);
+}
+
+async function getProductsWithStock() {
+  const products = await dbGetAll('products');
+  const results = [];
+  for (const p of products) {
+    const stock = await getProductStock(p.id);
+    const variantCount = (await dbGetByIndex('product_variants', 'productId', p.id)).length;
+    results.push({ ...p, totalStock: stock, variantCount });
+  }
+  return results;
+}
+
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => (ctx || document).querySelectorAll(sel);
-const el = (tag, attrs = {}, html = '') => {
-  const e = document.createElement(tag);
-  Object.entries(attrs).forEach(([k, v]) => { if (k === 'className') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); });
-  if (html) e.innerHTML = html;
-  return e;
-};
 
 function fmtDate(ts) {
   const d = new Date(ts);
@@ -458,17 +505,13 @@ function fmtDate(ts) {
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function fmtDateShort(ts) {
-  const d = new Date(ts);
-  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
-}
-
+let toastTimer;
 function showToast(msg, type = '') {
+  clearTimeout(toastTimer);
   const t = $('#toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.classList.remove('show'); }, 2200);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2200);
 }
 
 function confirm(msg, title = '确认操作') {
@@ -490,31 +533,73 @@ function confirm(msg, title = '确认操作') {
   });
 }
 
+// ============ PWA Install ============
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('#installBanner').classList.add('show');
+});
+
+$('#installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const result = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  $('#installBanner').classList.remove('show');
+  if (result.outcome === 'accepted') showToast('安装成功', 'success');
+});
+
+// Also install from menu (for browsers that don't show beforeinstallprompt)
+// The header install button is visible when in browser mode
+if (!window.matchMedia('(display-mode: standalone)').matches) {
+  // We're in browser mode — show header install hint
+}
+
 // ============ Modal ============
 function openModal(title, bodyHTML, footerHTML = '') {
   $('#modalTitle').textContent = title;
   $('#modalBody').innerHTML = bodyHTML;
   $('#modalFooter').innerHTML = footerHTML;
   $('#modalOverlay').classList.add('open');
+  // Push a history state so Android back button can close the modal
+  history.pushState({ modal: true }, '');
 }
 
-function closeModal() {
+function closeModal(evt) {
+  if (evt && evt.target !== evt.currentTarget) return;
   $('#modalOverlay').classList.remove('open');
 }
 
 $('#modalClose').addEventListener('click', closeModal);
-$('#modalOverlay').addEventListener('click', (e) => { if (e.target === $('#modalOverlay')) closeModal(); });
+$('#modalOverlay').addEventListener('click', (e) => {
+  if (e.target === $('#modalOverlay')) {
+    closeModal();
+  }
+});
+
+// Android/gesture back: close modal instead of leaving page
+window.addEventListener('popstate', (e) => {
+  if ($('#modalOverlay').classList.contains('open')) {
+    closeModal();
+  }
+});
 
 // ============ Navigation & FAB ============
 let currentPage = 'dashboard';
+let currentFilters = {};
 
 function navigateTo(page, params = {}) {
   currentPage = page;
+  currentFilters = params;
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+
   if (page === 'dashboard') { renderDashboard(); $('#headerTitle').textContent = '靴履云仓'; $('#searchBar').style.display = 'none'; }
-  else if (page === 'products') { renderProducts(params); $('#headerTitle').textContent = '库存管理'; $('#searchBar').style.display = 'flex'; }
-  else if (page === 'transactions') { renderTransactions(params); $('#headerTitle').textContent = '出入库记录'; $('#searchBar').style.display = 'none'; }
+  else if (page === 'products') { renderProducts(); $('#headerTitle').textContent = '库存管理'; $('#searchBar').style.display = 'flex'; }
+  else if (page === 'transactions') { renderTransactions(); $('#headerTitle').textContent = '出入库记录'; $('#searchBar').style.display = 'none'; }
   else if (page === 'settings') { renderSettings(); $('#headerTitle').textContent = '设置'; $('#searchBar').style.display = 'none'; }
+
   $('#mainContent').scrollTop = 0;
   closeFabMenu();
 }
@@ -551,16 +636,17 @@ let searchTimer;
 $('#searchInput').addEventListener('input', () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
-    if (currentPage === 'products') renderProducts({ search: $('#searchInput').value.trim() });
+    if (currentPage === 'products') renderProducts();
   }, 300);
 });
 
 $('#btnSearch').addEventListener('click', () => {
   if (currentPage === 'products') {
-    navigateTo('products', { search: '' });
+    currentFilters = { search: '' };
     $('#searchInput').value = '';
     $('#searchInput').focus();
   } else {
+    $('#searchInput').value = '';
     navigateTo('products');
   }
 });
@@ -568,21 +654,26 @@ $('#btnSearch').addEventListener('click', () => {
 // ============ Dashboard ============
 async function renderDashboard() {
   const main = $('#mainContent');
-  const products = await dbGetAll('products');
+  const productsWithStock = await getProductsWithStock();
   const transactions = await dbGetAll('transactions');
   const st = await dbGetAll('settings');
   const lowStockThreshold = parseInt(st.find(s => s.key === 'lowStockThreshold')?.value || '10');
 
-  const totalProducts = products.length;
-  const totalStock = products.reduce((s, p) => s + (p.stock || 0), 0);
-  const totalValue = products.reduce((s, p) => s + (p.cost || 0) * (p.stock || 0), 0);
-  const lowStockItems = products.filter(p => (p.stock || 0) <= lowStockThreshold);
+  const totalProducts = productsWithStock.length;
+  const totalStock = productsWithStock.reduce((s, p) => s + p.totalStock, 0);
 
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const todayTx = transactions.filter(t => t.createdAt >= todayStart);
   const todayIn = todayTx.filter(t => t.type === 'in').reduce((s, t) => s + t.quantity, 0);
   const todayOut = todayTx.filter(t => t.type === 'out').reduce((s, t) => s + t.quantity, 0);
+
+  // Find products with any low-stock variant
+  const lowStockProducts = [];
+  for (const p of productsWithStock) {
+    const lowVars = await getProductLowStockVariants(p.id, lowStockThreshold);
+    if (lowVars.length > 0) lowStockProducts.push({ product: p, lowVariants: lowVars });
+  }
 
   const recentTx = [...transactions].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
 
@@ -591,7 +682,7 @@ async function renderDashboard() {
       <div class="stat-card">
         <div class="stat-icon icon-store"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
         <div class="stat-value">${totalStock.toLocaleString()}</div>
-        <div class="stat-label">库存总量</div>
+        <div class="stat-label">库存总量（双）</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon icon-in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
@@ -609,48 +700,49 @@ async function renderDashboard() {
         <div class="stat-label">今日出库</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" style="color:var(--warning);font-size:20px">${lowStockItems.length}</div>
+        <div class="stat-value" style="color:var(--warning);font-size:20px">${lowStockProducts.length}</div>
         <div class="stat-label">库存不足</div>
       </div>
     </div>
 
-    ${lowStockItems.length > 0 ? `
+    ${lowStockProducts.length > 0 ? `
     <div class="card">
       <div class="card-header">
-        <span class="card-title">⚠ 低库存提醒</span>
-        <a href="javascript:void(0)" onclick="navigateTo('products',{filter:'low'})" style="font-size:13px;color:var(--accent)">查看全部 →</a>
+        <span class="card-title">⚠ 低库存提醒（阈值 ${lowStockThreshold}）</span>
+        <a href="javascript:void(0)" style="font-size:13px;color:var(--accent)" onclick="navigateTo('products',{filter:'low'})">查看全部 →</a>
       </div>
-      ${lowStockItems.slice(0, 5).map(p => `
-        <div class="alert-item">
+      ${lowStockProducts.slice(0, 8).map(({ product, lowVariants }) => {
+        const sizes = lowVariants.map(v => v.size).join(' / ');
+        const minStock = Math.min(...lowVariants.map(v => v.stock || 0));
+        return `<div class="alert-item" onclick="showProductDetail(${product.id})">
           <div class="alert-dot pulse"></div>
           <div class="alert-info">
-            <div class="alert-name">${escHtml(p.name)}</div>
-            <div class="alert-meta">${p.sku || ''} · ${p.location || '未设库位'}</div>
+            <div class="alert-name">${escHtml(product.name)}</div>
+            <div class="alert-meta">尺码 ${sizes} 不足 · ${product.location || '未设库位'}</div>
           </div>
-          <div class="alert-stock">${p.stock || 0}</div>
-        </div>
-      `).join('')}
+          <div class="alert-stock">最低 ${minStock}</div>
+        </div>`;
+      }).join('')}
     </div>
     ` : ''}
 
     <div class="card">
       <div class="card-header">
         <span class="card-title">最近操作</span>
-        <a href="javascript:void(0)" onclick="navigateTo('transactions')" style="font-size:13px;color:var(--accent)">全部 →</a>
+        <a href="javascript:void(0)" style="font-size:13px;color:var(--accent)" onclick="navigateTo('transactions')">全部 →</a>
       </div>
       ${recentTx.length === 0 ? '<div class="empty" style="padding:24px"><p>暂无操作记录</p></div>' :
       recentTx.map(t => {
-        const p = products.find(x => x.id === t.productId);
+        const p = productsWithStock.find(x => x.id === t.productId);
         const isIn = t.type === 'in';
         return `<div class="list-item" onclick="showTransactionDetail(${t.id})">
           <div class="list-thumb" style="font-size:18px">${isIn ? '📥' : '📤'}</div>
           <div class="list-info">
-            <div class="list-name">${escHtml(p?.name || '已删除商品')}</div>
+            <div class="list-name">${escHtml(p?.name || '已删除商品')}${t.size ? ' ' + t.size + '码' : ''}</div>
             <div class="list-meta">${fmtDate(t.createdAt)} · ${t.supplier || t.destination || ''}</div>
           </div>
           <div class="list-right">
             <div class="count ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}${t.quantity}</div>
-            <div class="sub">${t.sku || ''}</div>
           </div>
         </div>`;
       }).join('')}
@@ -658,61 +750,78 @@ async function renderDashboard() {
   `;
 }
 
-// ============ Products ============
-async function renderProducts({ search, filter } = {}) {
+// ============ Products List ============
+async function renderProducts() {
   const main = $('#mainContent');
-  let products = await dbGetAll('products');
+  const search = $('#searchInput').value.trim().toLowerCase() || currentFilters.search || '';
+  const filter = currentFilters.filter || '';
   const st = await dbGetAll('settings');
   const lowStockThreshold = parseInt(st.find(s => s.key === 'lowStockThreshold')?.value || '10');
 
+  let productsWithStock = await getProductsWithStock();
+
   if (search) {
     const q = search.toLowerCase();
-    products = products.filter(p => (p.name || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q));
-    $('#searchInput').value = search;
+    productsWithStock = productsWithStock.filter(p =>
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.sku || '').toLowerCase().includes(q) ||
+      (p.brand || '').toLowerCase().includes(q)
+    );
   }
   if (filter === 'low') {
-    products = products.filter(p => (p.stock || 0) <= lowStockThreshold);
+    const lowIds = new Set();
+    for (const p of productsWithStock) {
+      const lowVars = await getProductLowStockVariants(p.id, lowStockThreshold);
+      if (lowVars.length > 0) lowIds.add(p.id);
+    }
+    productsWithStock = productsWithStock.filter(p => lowIds.has(p.id));
   }
 
-  products.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+  productsWithStock.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
 
-  if (products.length === 0) {
+  if (productsWithStock.length === 0) {
     main.innerHTML = `
       <div class="empty">
         <div class="empty-icon">📦</div>
-        <h3>${search ? '未找到匹配商品' : '还没有商品'}</h3>
-        <p>${search ? '试试其他关键词' : '点击下方 + 按钮添加第一个商品'}</p>
-        ${!search ? '<button class="btn btn-primary" onclick="showProductForm()">添加商品</button>' : ''}
+        <h3>${search || filter ? '未找到匹配商品' : '还没有商品'}</h3>
+        <p>${search || filter ? '试试其他关键词' : '点击下方 + 按钮添加第一个商品'}</p>
+        ${!search && !filter ? '<button class="btn btn-primary" onclick="showProductForm()">添加商品</button>' : ''}
       </div>
     `;
     return;
   }
 
-  main.innerHTML = products.map(p => {
-    const low = (p.stock || 0) <= lowStockThreshold;
+  main.innerHTML = productsWithStock.map(p => {
+    const sizes = p.variantCount > 0 ? `${p.variantCount}个尺码` : '';
+    const low = p.totalStock <= lowStockThreshold && p.totalStock > 0;
+    const zero = p.totalStock === 0;
     return `<div class="list-item" onclick="showProductDetail(${p.id})">
       <div class="list-thumb">
         ${p.photo ? `<img src="${p.photo}" alt="">` : '<span>👟</span>'}
       </div>
       <div class="list-info">
-        <div class="list-name">${escHtml(p.name)}${low ? ' <span class="tag tag-warn" style="margin-left:6px">低库存</span>' : ''}</div>
-        <div class="list-meta">${p.sku || '无SKU'} · ${p.category || '未分类'} · ${p.size || ''}${p.color ? ' · ' + p.color : ''}</div>
+        <div class="list-name">${escHtml(p.name)}${low ? ' <span class="tag tag-warn" style="margin-left:6px">低库存</span>' : ''}${zero ? ' <span class="tag tag-out" style="margin-left:6px">缺货</span>' : ''}</div>
+        <div class="list-meta">${p.sku || '无SKU'} · ${p.category || '未分类'} · ${sizes || ''} ${p.color || ''}</div>
       </div>
       <div class="list-right">
-        <div class="count" style="color:${low ? 'var(--warning)' : 'inherit'}">${p.stock || 0}</div>
+        <div class="count" style="color:${zero ? 'var(--danger)' : low ? 'var(--warning)' : 'inherit'}">${p.totalStock}</div>
         <div class="sub">${p.location || ''}</div>
       </div>
     </div>`;
   }).join('');
 }
 
+// ============ Product Detail ============
 async function showProductDetail(id) {
   const p = await dbGet('products', id);
   if (!p) return;
-  const main = $('#mainContent');
-  const lowThreshold = parseInt((await dbGetAll('settings')).find(s => s.key === 'lowStockThreshold')?.value || '10');
-  const low = (p.stock || 0) <= lowThreshold;
+  const variants = await getProductVariants(id);
+  const totalStock = variants.reduce((s, v) => s + (v.stock || 0), 0);
+  const st = await dbGetAll('settings');
+  const lowThreshold = parseInt(st.find(s => s.key === 'lowStockThreshold')?.value || '10');
+  const lowVarCount = variants.filter(v => (v.stock || 0) <= lowThreshold).length;
 
+  const main = $('#mainContent');
   main.innerHTML = `
     <div class="detail-header">
       <button class="back-btn" onclick="navigateTo('products')">
@@ -721,25 +830,45 @@ async function showProductDetail(id) {
       <div class="detail-photo">${p.photo ? `<img src="${p.photo}" alt="" style="width:100%;height:100%;object-fit:cover">` : ''}</div>
       <div class="detail-name">${escHtml(p.name)}</div>
       <div class="detail-sku">${p.sku || '无SKU'}</div>
-      <div class="detail-stock">${p.stock || 0} <span style="font-size:14px;font-weight:400;opacity:.6">双</span></div>
+      <div class="detail-stock">${totalStock} <span style="font-size:14px;font-weight:400;opacity:.6">双 · ${variants.length}个尺码</span></div>
       <div class="detail-meta-row">
-        ${low ? '<span class="tag tag-warn">库存不足</span>' : '<span class="tag tag-in">库存正常</span>'}
+        ${totalStock === 0 ? '<span class="tag tag-out">缺货</span>' : lowVarCount > 0 ? `<span class="tag tag-warn">${lowVarCount}个尺码库存不足</span>` : '<span class="tag tag-in">库存正常</span>'}
         ${p.category ? `<span class="tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.9)">${escHtml(p.category)}</span>` : ''}
       </div>
     </div>
     <div class="detail-body">
       <div class="detail-section">
+        <h4>尺码库存明细</h4>
+        <div style="overflow-x:auto;margin:-4px -4px 0">
+          <table class="variant-table">
+            <thead><tr><th>尺码</th><th>库存（双）</th><th>状态</th></tr></thead>
+            <tbody>
+              ${variants.map(v => {
+                const stock = v.stock || 0;
+                const isLow = stock <= lowThreshold;
+                const isZero = stock === 0;
+                return `<tr>
+                  <td style="font-weight:600;font-family:var(--font-mono)">${escHtml(String(v.size))}</td>
+                  <td class="v-stock ${isZero ? 'v-zero' : isLow ? 'v-low' : ''}">${stock}</td>
+                  <td>${isZero ? '<span class="tag tag-out">缺货</span>' : isLow ? '<span class="tag tag-warn">偏低</span>' : '<span class="tag tag-in">正常</span>'}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="detail-section">
         <h4>基本信息</h4>
         <div class="detail-field"><span class="key">品牌</span><span class="val">${escHtml(p.brand || '-')}</span></div>
-        <div class="detail-field"><span class="key">尺码</span><span class="val">${escHtml(p.size || '-')}</span></div>
         <div class="detail-field"><span class="key">颜色</span><span class="val">${escHtml(p.color || '-')}</span></div>
         <div class="detail-field"><span class="key">分类</span><span class="val">${escHtml(p.category || '-')}</span></div>
         <div class="detail-field"><span class="key">供应商</span><span class="val">${escHtml(p.supplier || '-')}</span></div>
       </div>
       <div class="detail-section">
         <h4>库存信息</h4>
-        <div class="detail-field"><span class="key">当前库存</span><span class="val" style="color:${low ? 'var(--danger)' : 'inherit'}">${p.stock || 0} 双</span></div>
-        <div class="detail-field"><span class="key">最低库存阈值</span><span class="val">${p.minStock ?? lowThreshold} 双</span></div>
+        <div class="detail-field"><span class="key">总库存</span><span class="val" style="font-weight:700">${totalStock} 双</span></div>
+        <div class="detail-field"><span class="key">最低库存阈值</span><span class="val">${p.minStock ?? lowThreshold} 双/尺码</span></div>
         <div class="detail-field"><span class="key">库位</span><span class="val">${escHtml(p.location || '-')}</span></div>
         <div class="detail-field"><span class="key">成本价</span><span class="val">${p.cost ? '¥' + Number(p.cost).toFixed(2) : '-'}</span></div>
         <div class="detail-field"><span class="key">零售价</span><span class="val">${p.price ? '¥' + Number(p.price).toFixed(2) : '-'}</span></div>
@@ -754,11 +883,18 @@ async function showProductDetail(id) {
   `;
 }
 
+// ============ Product Form ============
 async function showProductForm(editId = null) {
   let product = null;
-  if (editId) product = await dbGet('products', editId);
+  let existingVariants = [];
+  if (editId) {
+    product = await dbGet('products', editId);
+    existingVariants = await getProductVariants(editId);
+  }
   const categories = await dbGetAll('categories');
   const suppliers = await dbGetAll('suppliers');
+
+  const variantsJSON = JSON.stringify(existingVariants.map(v => ({ size: v.size, stock: v.stock || 0 })));
 
   openModal(editId ? '编辑商品' : '新增商品', `
     <div class="form-group">
@@ -768,22 +904,16 @@ async function showProductForm(editId = null) {
     <div class="form-row">
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label"><span class="req">*</span> SKU编码</label>
-        <input class="form-input" id="pfSku" value="${escHtml(product?.sku || '')}" placeholder="例如：AM270-M-BK-42">
+        <input class="form-input" id="pfSku" value="${escHtml(product?.sku || '')}" placeholder="例如：AM270-M-BK">
       </div>
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">品牌</label>
         <input class="form-input" id="pfBrand" value="${escHtml(product?.brand || '')}" placeholder="例如：Nike">
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group" style="margin-bottom:16px">
-        <label class="form-label">尺码</label>
-        <input class="form-input" id="pfSize" value="${escHtml(product?.size || '')}" placeholder="例如：42">
-      </div>
-      <div class="form-group" style="margin-bottom:16px">
-        <label class="form-label">颜色</label>
-        <input class="form-input" id="pfColor" value="${escHtml(product?.color || '')}" placeholder="例如：黑色">
-      </div>
+    <div class="form-group">
+      <label class="form-label">颜色</label>
+      <input class="form-input" id="pfColor" value="${escHtml(product?.color || '')}" placeholder="例如：黑色">
     </div>
     <div class="form-row">
       <div class="form-group" style="margin-bottom:16px">
@@ -801,16 +931,25 @@ async function showProductForm(editId = null) {
         </select>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group" style="margin-bottom:16px">
-        <label class="form-label"><span class="req">*</span> 初始库存</label>
-        <input class="form-input" id="pfStock" type="number" min="0" value="${product?.stock || 0}">
+
+    <div class="form-group">
+      <label class="form-label"><span class="req">*</span> 尺码与库存</label>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">输入尺码范围自动生成，也可逐个添加</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input class="form-input" id="pfSizeFrom" placeholder="起始尺码（如 37）" style="flex:1" inputmode="decimal">
+        <span style="display:flex;align-items:center;color:var(--text-secondary)">—</span>
+        <input class="form-input" id="pfSizeTo" placeholder="结束尺码（如 43）" style="flex:1" inputmode="decimal">
       </div>
-      <div class="form-group" style="margin-bottom:16px">
-        <label class="form-label">最低库存阈值</label>
-        <input class="form-input" id="pfMinStock" type="number" min="0" value="${product?.minStock || ''}" placeholder="全局默认10">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input class="form-input" id="pfSingleSize" placeholder="或添加单个尺码" inputmode="decimal" style="flex:1">
+        <button class="btn btn-sm btn-secondary" id="pfAddSize" style="flex-shrink:0">添加</button>
       </div>
+      <div class="card" style="background:var(--bg);padding:10px">
+        <div id="pfVariantList"></div>
+      </div>
+      <input type="hidden" id="pfVariantsData" value='${variantsJSON}'>
     </div>
+
     <div class="form-row">
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">成本价 (¥)</label>
@@ -820,6 +959,10 @@ async function showProductForm(editId = null) {
         <label class="form-label">零售价 (¥)</label>
         <input class="form-input" id="pfPrice" type="number" step="0.01" min="0" value="${product?.price || ''}">
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">最低库存阈值</label>
+      <input class="form-input" id="pfMinStock" type="number" min="0" value="${product?.minStock || ''}" placeholder="每个尺码低于此数提醒（全局默认10）">
     </div>
     <div class="form-group">
       <label class="form-label">库位</label>
@@ -844,32 +987,116 @@ async function showProductForm(editId = null) {
     <button class="btn btn-primary" id="pfSaveBtn">保存</button>
   `);
 
+  // Variant management
+  function getVariants() {
+    try { return JSON.parse($('#pfVariantsData').value || '[]'); } catch(e) { return []; }
+  }
+  function setVariants(data) { $('#pfVariantsData').value = JSON.stringify(data); }
+  function renderVariants() {
+    const vars = getVariants();
+    const list = $('#pfVariantList');
+    if (vars.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:13px;padding:12px">暂无尺码，请添加</div>';
+      return;
+    }
+    list.innerHTML = vars.map((v, i) => `
+      <div class="variant-input-row">
+        <span class="vi-size">${escHtml(String(v.size))}码</span>
+        <div class="qty-stepper">
+          <button onclick="event.preventDefault();variantChange(${i},-1)">−</button>
+          <input type="number" value="${v.stock}" min="0" onchange="variantSetStock(${i},this.value)" style="font-size:14px">
+          <button onclick="event.preventDefault();variantChange(${i},1)">+</button>
+        </div>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">双</span>
+        <button class="btn btn-sm btn-secondary" style="margin-left:auto;color:var(--danger);font-size:11px" onclick="event.preventDefault();deleteVariant(${i})">删除</button>
+      </div>
+    `).join('');
+  }
+
+  window.variantChange = function(i, delta) {
+    const vars = getVariants();
+    vars[i].stock = Math.max(0, (vars[i].stock || 0) + delta);
+    setVariants(vars);
+    renderVariants();
+  };
+  window.variantSetStock = function(i, val) {
+    const vars = getVariants();
+    vars[i].stock = Math.max(0, parseInt(val) || 0);
+    setVariants(vars);
+    renderVariants();
+  };
+  window.deleteVariant = function(i) {
+    const vars = getVariants();
+    vars.splice(i, 1);
+    setVariants(vars);
+    renderVariants();
+  };
+
+  $('#pfAddSize').addEventListener('click', () => {
+    const fromVal = $('#pfSizeFrom').value.trim();
+    const toVal = $('#pfSizeTo').value.trim();
+    const singleVal = $('#pfSingleSize').value.trim();
+
+    const vars = getVariants();
+    const existingSizes = new Set(vars.map(v => String(v.size)));
+
+    if (singleVal) {
+      if (!existingSizes.has(singleVal)) {
+        vars.push({ size: singleVal, stock: 1 });
+      }
+      $('#pfSingleSize').value = '';
+    } else if (fromVal && toVal) {
+      const from = parseFloat(fromVal);
+      const to = parseFloat(toVal);
+      if (!isNaN(from) && !isNaN(to) && from <= to) {
+        for (let s = from; s <= to; s++) {
+          const sz = /\./.test(String(s)) ? String(s) : String(Math.round(s));
+          if (!existingSizes.has(sz)) {
+            vars.push({ size: sz, stock: 1 });
+          }
+        }
+      }
+      $('#pfSizeFrom').value = '';
+      $('#pfSizeTo').value = '';
+    } else if (fromVal) {
+      if (!existingSizes.has(fromVal)) {
+        vars.push({ size: fromVal, stock: 1 });
+      }
+      $('#pfSizeFrom').value = '';
+    }
+
+    vars.sort((a, b) => (parseFloat(a.size) || 0) - (parseFloat(b.size) || 0));
+    setVariants(vars);
+    renderVariants();
+  });
+
   if (editId) {
     $('#pfDeleteBtn').addEventListener('click', async () => {
-      const ok = await confirm('删除后将无法恢复，该商品相关的出入库记录仍会保留。', '删除商品');
+      const ok = await confirm('删除后无法恢复，该商品相关的出入库记录仍会保留。', '删除商品');
       if (!ok) return;
       await dbDelete('products', editId);
+      const vs = await dbGetByIndex('product_variants', 'productId', editId);
+      for (const v of vs) await dbDelete('product_variants', v.id);
       closeModal();
       showToast('已删除', 'success');
-      renderProducts({});
+      renderProducts();
     });
   }
 
   $('#pfSaveBtn').addEventListener('click', async () => {
     const name = $('#pfName').value.trim();
     const sku = $('#pfSku').value.trim();
-    const stock = parseInt($('#pfStock').value) || 0;
+    const variants = getVariants();
     if (!name) { showToast('请输入商品名称'); return; }
     if (!sku) { showToast('请输入SKU编码'); return; }
+    if (variants.length === 0) { showToast('请添加至少一个尺码'); return; }
 
-    const data = {
+    const productData = {
       name, sku,
       brand: $('#pfBrand').value.trim(),
-      size: $('#pfSize').value.trim(),
       color: $('#pfColor').value.trim(),
       category: $('#pfCategory').value,
       supplier: $('#pfSupplier').value,
-      stock: editId ? (product.stock || 0) : stock,
       minStock: parseInt($('#pfMinStock').value) || null,
       cost: parseFloat($('#pfCost').value) || null,
       price: parseFloat($('#pfPrice').value) || null,
@@ -878,91 +1105,68 @@ async function showProductForm(editId = null) {
       note: $('#pfNote').value.trim(),
       updatedAt: Date.now()
     };
-    if (!editId) data.createdAt = Date.now();
+    if (!editId) productData.createdAt = Date.now();
 
     try {
-      if (editId) data.id = editId;
-      else {
+      // IMPORTANT: fetch all data BEFORE opening any IDB transaction (auto-commits on await)
+      let oldVars = [];
+      let skuExists = false;
+      if (editId) {
+        oldVars = await dbGetByIndex('product_variants', 'productId', editId);
+      } else {
         const existing = await dbGetByIndex('products', 'sku', sku);
-        if (existing.length > 0) { showToast('SKU编码已存在'); return; }
+        skuExists = existing.length > 0;
       }
-      await dbPut('products', data);
-      closeModal();
-      showToast(editId ? '已更新' : '已添加', 'success');
-      if (currentPage === 'products') renderProducts({});
-      else if (currentPage === 'dashboard') renderDashboard();
+
+      if (!editId && skuExists) { showToast('SKU编码已存在'); return; }
+
+      let productId = editId;
+
+      // Step 1: save product
+      const tx1 = db.transaction(['products'], 'readwrite');
+      const pStore = tx1.objectStore('products');
+      if (editId) {
+        productData.id = editId;
+        pStore.put(productData);
+      } else {
+        const addReq = pStore.add(productData);
+        addReq.onsuccess = () => { productId = addReq.result; };
+      }
+
+      tx1.oncomplete = () => {
+        // Step 2: now save variants (after product ID is known)
+        const tx2 = db.transaction(['product_variants'], 'readwrite');
+        const vStore = tx2.objectStore('product_variants');
+
+        if (editId) {
+          // Delete old variants first
+          for (const ov of oldVars) vStore.delete(ov.id);
+        }
+
+        for (const v of variants) {
+          vStore.add({ productId: productId || editId, size: v.size, stock: v.stock || 1, createdAt: Date.now() });
+        }
+
+        tx2.oncomplete = () => {
+          closeModal();
+          showToast(editId ? '已更新' : '已添加', 'success');
+          refreshCurrentPage();
+        };
+        tx2.onerror = () => showToast('保存尺码失败');
+      };
+      tx1.onerror = () => showToast('保存失败');
     } catch (err) {
       showToast('保存失败：' + err.message);
     }
   });
+
+  renderVariants();
 }
 
-// ============ Transactions ============
-async function renderTransactions({ productId } = {}) {
-  const main = $('#mainContent');
-  let transactions = await dbGetAll('transactions');
-  const products = await dbGetAll('products');
-
-  if (productId) {
-    transactions = transactions.filter(t => t.productId === productId);
-  }
-
-  transactions.sort((a, b) => b.createdAt - a.createdAt);
-
-  main.innerHTML = `
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn btn-sm btn-secondary filter-btn active" data-filter="all">全部</button>
-      <button class="btn btn-sm btn-secondary filter-btn" data-filter="in">入库</button>
-      <button class="btn btn-sm btn-secondary filter-btn" data-filter="out">出库</button>
-    </div>
-    <div id="txList"></div>
-  `;
-
-  let activeFilter = 'all';
-
-  function renderList() {
-    let filtered = transactions;
-    if (activeFilter === 'in') filtered = transactions.filter(t => t.type === 'in');
-    else if (activeFilter === 'out') filtered = transactions.filter(t => t.type === 'out');
-
-    const list = $('#txList');
-    if (filtered.length === 0) {
-      list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>暂无记录</p></div>';
-      return;
-    }
-    list.innerHTML = filtered.map(t => {
-      const p = products.find(x => x.id === t.productId);
-      const isIn = t.type === 'in';
-      return `<div class="list-item" onclick="showTransactionDetail(${t.id})">
-        <div class="list-thumb" style="font-size:18px">${isIn ? '📥' : '📤'}</div>
-        <div class="list-info">
-          <div class="list-name">${escHtml(p?.name || '已删除商品')}</div>
-          <div class="list-meta">${fmtDate(t.createdAt)} · ${t.supplier || t.destination || ''}</div>
-        </div>
-        <div class="list-right">
-          <div class="count ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}${t.quantity}</div>
-          <div class="sub">${t.sku || ''}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  renderList();
-
-  $$('.filter-btn', main).forEach(btn => {
-    btn.addEventListener('click', () => {
-      $$('.filter-btn', main).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilter = btn.dataset.filter;
-      renderList();
-    });
-  });
-}
-
+// ============ Transaction Form ============
 async function showTransactionForm(type, presetProductId = null) {
   const products = await dbGetAll('products');
   const suppliers = await dbGetAll('suppliers');
-
   const isIn = type === 'in';
   const title = isIn ? '入库' : '出库';
   const btnLabel = isIn ? '确认入库' : '确认出库';
@@ -972,11 +1176,14 @@ async function showTransactionForm(type, presetProductId = null) {
       <label class="form-label"><span class="req">*</span> 选择商品</label>
       <select class="form-input" id="tfProduct">
         <option value="">请选择商品</option>
-        ${products.map(p => `<option value="${p.id}" ${p.id === presetProductId ? 'selected' : ''}>${escHtml(p.name)} (${p.sku || '无SKU'} · 库存${p.stock || 0})</option>`).join('')}
+        ${products.map(p => `<option value="${p.id}" ${p.id === presetProductId ? 'selected' : ''}>${escHtml(p.name)} (${p.sku || '无SKU'})</option>`).join('')}
       </select>
-      ${!isIn ? '<p style="font-size:11px;color:var(--text-secondary);margin-top:4px">当前库存将自动显示</p>' : ''}
     </div>
-    <div class="form-group">
+    <div class="form-group variant-picker" id="tfVariantPicker" style="display:none">
+      <label class="form-label"><span class="req">*</span> 选择尺码</label>
+      <div class="size-chips" id="tfVariantChips"></div>
+    </div>
+    <div class="form-group" id="tfQtyGroup" style="display:none">
       <label class="form-label"><span class="req">*</span> 数量</label>
       <input class="form-input" id="tfQty" type="number" min="1" placeholder="请输入数量（双）">
     </div>
@@ -1006,48 +1213,105 @@ async function showTransactionForm(type, presetProductId = null) {
       <label class="form-label">备注</label>
       <textarea class="form-input form-textarea" id="tfNote" placeholder="补充说明…"></textarea>
     </div>
-    <div class="card" style="background:${isIn ? 'var(--success-light)' : 'var(--danger-light)'};margin-bottom:0">
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">${isIn ? '操作后库存将增加' : '操作后库存将减少'}</div>
-      <div style="font-size:13px">${isIn ? '入库数量将自动累加到当前库存' : '请确认库存充足后再操作出库'}</div>
+    <div class="card" style="background:${isIn ? 'var(--success-light)' : 'var(--danger-light)'};margin-bottom:0;font-size:13px">
+      ${isIn ? '所选尺码的库存将相应增加' : '请确认所选尺码库存充足'}
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">取消</button>
     <button class="btn btn-primary" id="tfSaveBtn" style="background:${isIn ? 'var(--success)' : 'var(--danger)'}">${btnLabel}</button>
   `);
 
+  let selectedVariantId = null;
+  let selectedVariantSize = null;
+  let selectedVariantStock = 0;
+
+  async function loadVariants(productId) {
+    const variants = await getProductVariants(productId);
+    const chips = $('#tfVariantChips');
+    selectedVariantId = null;
+    selectedVariantSize = null;
+    selectedVariantStock = 0;
+
+    if (variants.length === 0) {
+      $('#tfVariantPicker').style.display = 'none';
+      $('#tfQtyGroup').style.display = 'none';
+      chips.innerHTML = '<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">该商品暂无尺码</div>';
+      return;
+    }
+
+    $('#tfVariantPicker').style.display = 'block';
+    chips.innerHTML = variants.map(v => `
+      <div class="size-chip" data-vid="${v.id}" data-size="${escHtml(String(v.size))}" data-stock="${v.stock || 0}">
+        <span class="chip-size">${escHtml(String(v.size))}</span>
+        <span class="chip-qty">${v.stock || 0}双</span>
+      </div>
+    `).join('');
+
+    chips.querySelectorAll('.size-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        selectedVariantId = parseInt(chip.dataset.vid);
+        selectedVariantSize = chip.dataset.size;
+        selectedVariantStock = parseInt(chip.dataset.stock) || 0;
+        $('#tfQtyGroup').style.display = 'block';
+        $('#tfQty').focus();
+
+        if (!isIn && selectedVariantStock === 0) {
+          showToast('该尺码已缺货');
+        }
+      });
+    });
+  }
+
+  const productSelect = $('#tfProduct');
+  productSelect.addEventListener('change', () => {
+    const pid = parseInt(productSelect.value);
+    if (pid) loadVariants(pid);
+    else {
+      $('#tfVariantPicker').style.display = 'none';
+      $('#tfQtyGroup').style.display = 'none';
+    }
+  });
+
+  if (presetProductId) {
+    productSelect.value = presetProductId;
+    loadVariants(presetProductId);
+  }
+
   if (isIn) {
     const supSelect = $('#tfSupplier');
     const supCustom = $('#tfSupplierCustom');
     supSelect.addEventListener('change', () => {
-      if (supSelect.value === '__custom__') {
-        supCustom.style.display = 'block';
-        supCustom.focus();
-      } else {
-        supCustom.style.display = 'none';
-      }
+      supCustom.style.display = supSelect.value === '__custom__' ? 'block' : 'none';
+      if (supSelect.value === '__custom__') supCustom.focus();
     });
   }
 
   $('#tfSaveBtn').addEventListener('click', async () => {
-    const productId = parseInt($('#tfProduct').value);
+    const productId = parseInt(productSelect.value);
     const qty = parseInt($('#tfQty').value);
     if (!productId) { showToast('请选择商品'); return; }
+    if (!selectedVariantId) { showToast('请选择尺码'); return; }
     if (!qty || qty <= 0) { showToast('请输入有效数量'); return; }
 
-    const product = await dbGet('products', productId);
-    if (!product) { showToast('商品不存在'); return; }
-
-    if (!isIn && (product.stock || 0) < qty) {
-      showToast('库存不足，当前库存：' + (product.stock || 0));
+    if (!isIn && selectedVariantStock < qty) {
+      showToast(`库存不足：该尺码仅剩 ${selectedVariantStock} 双`);
       return;
     }
+
+    const product = await dbGet('products', productId);
+    const variant = await dbGet('product_variants', selectedVariantId);
+    if (!product || !variant) { showToast('数据异常，请刷新'); return; }
 
     const supplier = isIn ? ($('#tfSupplier').value === '__custom__' ? $('#tfSupplierCustom').value.trim() : $('#tfSupplier').value) : '';
     const destination = !isIn ? $('#tfDestination').value.trim() : '';
 
     const tx = {
       productId,
+      variantId: selectedVariantId,
       sku: product.sku,
+      size: selectedVariantSize,
       type: isIn ? 'in' : 'out',
       quantity: qty,
       supplier: supplier || null,
@@ -1057,26 +1321,22 @@ async function showTransactionForm(type, presetProductId = null) {
       createdAt: Date.now()
     };
 
-    product.stock = (product.stock || 0) + (isIn ? qty : -qty);
-    product.updatedAt = Date.now();
+    variant.stock = (variant.stock || 0) + (isIn ? qty : -qty);
 
-    const txDB = db.transaction(['transactions', 'products'], 'readwrite');
-    const txStore = txDB.objectStore('transactions');
-    const pStore = txDB.objectStore('products');
-    txStore.add(tx);
-    pStore.put(product);
+    const txDB = db.transaction(['transactions', 'product_variants'], 'readwrite');
+    txDB.objectStore('transactions').add(tx);
+    txDB.objectStore('product_variants').put(variant);
 
     txDB.oncomplete = () => {
       closeModal();
       showToast(`${isIn ? '入库' : '出库'}成功`, 'success');
-      if (currentPage === 'dashboard') renderDashboard();
-      else if (currentPage === 'transactions') renderTransactions({});
-      else if (currentPage === 'products') renderProducts({});
+      refreshCurrentPage();
     };
-    txDB.onerror = () => { showToast('操作失败'); };
+    txDB.onerror = () => showToast('操作失败');
   });
 }
 
+// ============ Transaction Detail ============
 async function showTransactionDetail(id) {
   const tx = await dbGet('transactions', id);
   if (!tx) return;
@@ -1087,6 +1347,7 @@ async function showTransactionDetail(id) {
     <div class="detail-section">
       <div class="detail-field"><span class="key">商品</span><span class="val">${escHtml(product?.name || '已删除')}</span></div>
       <div class="detail-field"><span class="key">SKU</span><span class="val">${escHtml(tx.sku || '-')}</span></div>
+      ${tx.size ? `<div class="detail-field"><span class="key">尺码</span><span class="val" style="font-weight:600;font-family:var(--font-mono)">${escHtml(String(tx.size))} 码</span></div>` : ''}
       <div class="detail-field"><span class="key">类型</span><span class="val"><span class="tag ${isIn ? 'tag-in' : 'tag-out'}">${isIn ? '入库' : '出库'}</span></span></div>
       <div class="detail-field"><span class="key">数量</span><span class="val" style="color:${isIn ? 'var(--success)' : 'var(--danger)'}">${isIn ? '+' : '-'}${tx.quantity} 双</span></div>
       <div class="detail-field"><span class="key">${isIn ? '供应商' : '去向'}</span><span class="val">${escHtml(tx.supplier || tx.destination || '-')}</span></div>
@@ -1102,16 +1363,77 @@ async function showTransactionDetail(id) {
     await dbDelete('transactions', id);
     closeModal();
     showToast('已删除');
-    if (currentPage === 'transactions') renderTransactions({});
+    refreshCurrentPage();
   });
+}
+
+async function renderTransactions() {
+  const main = $('#mainContent');
+  let transactions = await dbGetAll('transactions');
+  const products = await dbGetAll('products');
+  transactions.sort((a, b) => b.createdAt - a.createdAt);
+
+  main.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-sm btn-secondary filter-btn active" data-filter="all">全部</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="in">入库</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="out">出库</button>
+    </div>
+    <div id="txList"></div>
+  `;
+
+  let activeFilter = 'all';
+
+  function renderList() {
+    let filtered = transactions;
+    if (activeFilter === 'in') filtered = transactions.filter(t => t.type === 'in');
+    else if (activeFilter === 'out') filtered = transactions.filter(t => t.type === 'out');
+
+    const list = $('#txList');
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>暂无记录</p></div>';
+      return;
+    }
+    list.innerHTML = filtered.map(t => {
+      const p = products.find(x => x.id === t.productId);
+      const isIn = t.type === 'in';
+      return `<div class="list-item" onclick="showTransactionDetail(${t.id})">
+        <div class="list-thumb" style="font-size:18px">${isIn ? '📥' : '📤'}</div>
+        <div class="list-info">
+          <div class="list-name">${escHtml(p?.name || '已删除商品')}${t.size ? ' ' + t.size + '码' : ''}</div>
+          <div class="list-meta">${fmtDate(t.createdAt)} · ${t.supplier || t.destination || ''}</div>
+        </div>
+        <div class="list-right">
+          <div class="count ${isIn ? 'in' : 'out'}">${isIn ? '+' : '-'}${t.quantity}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  renderList();
+
+  $$('.filter-btn', main).forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.filter-btn', main).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderList();
+    });
+  });
+}
+
+function refreshCurrentPage() {
+  if (currentPage === 'dashboard') renderDashboard();
+  else if (currentPage === 'transactions') renderTransactions();
+  else if (currentPage === 'products') renderProducts();
+  else if (currentPage === 'settings') renderSettings();
 }
 
 // ============ Settings ============
 async function renderSettings() {
   const main = $('#mainContent');
   const st = await dbGetAll('settings');
-  const getSetting = (key, def = '') => st.find(s => s.key === key)?.value || def;
-  const threshold = getSetting('lowStockThreshold', '10');
+  const threshold = st.find(s => s.key === 'lowStockThreshold')?.value || '10';
   const products = await dbGetAll('products');
   const cx = await dbGetAll('categories');
   const sx = await dbGetAll('suppliers');
@@ -1124,7 +1446,7 @@ async function renderSettings() {
           <div class="setting-icon icon-warn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
           <div class="setting-info">
             <div class="setting-name">低库存提醒阈值</div>
-            <div class="setting-desc">库存低于 ${threshold} 双时提醒补充</div>
+            <div class="setting-desc">每个尺码库存低于 ${threshold} 双时提醒</div>
           </div>
           <span class="setting-arrow">›</span>
         </div>
@@ -1178,7 +1500,7 @@ async function renderSettings() {
           <div class="setting-icon" style="background:#ECFDF5;color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
           <div class="setting-info">
             <div class="setting-name">导出数据为 Excel</div>
-            <div class="setting-desc">导出商品列表和出入库记录</div>
+            <div class="setting-desc">导出商品（含尺码明细）和出入库记录</div>
           </div>
           <span class="setting-arrow">›</span>
         </div>
@@ -1186,7 +1508,7 @@ async function renderSettings() {
           <div class="setting-icon" style="background:#FFF5ED;color:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
           <div class="setting-info">
             <div class="setting-name">从 Excel 导入</div>
-            <div class="setting-desc">批量导入商品数据（支持 .xlsx/.csv）</div>
+            <div class="setting-desc">批量导入商品（支持 .xlsx/.csv）</div>
           </div>
           <span class="setting-arrow">›</span>
         </div>
@@ -1194,7 +1516,7 @@ async function renderSettings() {
           <div class="setting-icon" style="background:#FFFBEB;color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
           <div class="setting-info">
             <div class="setting-name">数据备份</div>
-            <div class="setting-desc">导出全部数据为 JSON 备份文件</div>
+            <div class="setting-desc">导出全部数据为 JSON 文件</div>
           </div>
           <span class="setting-arrow">›</span>
         </div>
@@ -1215,7 +1537,7 @@ async function renderSettings() {
         <div class="setting-item" style="cursor:default">
           <div class="setting-info">
             <div class="setting-name">靴履云仓</div>
-            <div class="setting-desc">版本 1.0 · 共 ${products.length} 件商品</div>
+            <div class="setting-desc">版本 2.0 · ${products.length} 件商品</div>
           </div>
         </div>
       </div>
@@ -1223,27 +1545,27 @@ async function renderSettings() {
   `;
 }
 
+// ============ Settings sub-actions ============
 async function editThreshold() {
   const st = await dbGetAll('settings');
   const val = st.find(s => s.key === 'lowStockThreshold')?.value || '10';
   openModal('低库存提醒阈值', `
     <div class="form-group">
-      <label class="form-label">当库存低于此数量时提醒</label>
+      <label class="form-label">每个尺码库存低于此数量时提醒</label>
       <input class="form-input" id="thresholdInput" type="number" min="0" value="${val}">
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-    <button class="btn btn-primary" onclick="saveThreshold()">保存</button>
+    <button class="btn btn-primary" id="saveThBtn">保存</button>
   `);
-}
-
-async function saveThreshold() {
-  const val = parseInt($('#thresholdInput').value);
-  if (isNaN(val) || val < 0) { showToast('请输入有效数值'); return; }
-  await dbPut('settings', { key: 'lowStockThreshold', value: String(val) });
-  closeModal();
-  showToast('已保存', 'success');
-  renderSettings();
+  $('#saveThBtn').addEventListener('click', async () => {
+    const v = parseInt($('#thresholdInput').value);
+    if (isNaN(v) || v < 0) { showToast('请输入有效数值'); return; }
+    await dbPut('settings', { key: 'lowStockThreshold', value: String(v) });
+    closeModal();
+    showToast('已保存', 'success');
+    renderSettings();
+  });
 }
 
 async function addCategory() {
@@ -1254,26 +1576,21 @@ async function addCategory() {
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-    <button class="btn btn-primary" onclick="saveCategory()">保存</button>
+    <button class="btn btn-primary" id="saveCatBtn">保存</button>
   `);
-}
-
-async function saveCategory() {
-  const name = $('#catName').value.trim();
-  if (!name) { showToast('请输入分类名称'); return; }
-  try {
-    const existing = await dbGetByIndex('categories', 'name', name);
-    if (existing.length > 0) { showToast('该分类已存在'); return; }
-  } catch (e) {}
-  await dbPut('categories', { name });
-  closeModal();
-  showToast('已添加', 'success');
-  renderSettings();
+  $('#saveCatBtn').addEventListener('click', async () => {
+    const name = $('#catName').value.trim();
+    if (!name) { showToast('请输入分类名称'); return; }
+    try { const e = await dbGetByIndex('categories', 'name', name); if (e.length > 0) { showToast('该分类已存在'); return; } } catch(e) {}
+    await dbPut('categories', { name });
+    closeModal();
+    showToast('已添加', 'success');
+    renderSettings();
+  });
 }
 
 async function deleteCategory(id, name) {
-  const ok = await confirm(`确定删除分类「${name}」吗？`, '删除分类');
-  if (!ok) return;
+  if (!await confirm('确定删除分类「' + name + '」吗？', '删除分类')) return;
   await dbDelete('categories', id);
   showToast('已删除', 'success');
   renderSettings();
@@ -1281,74 +1598,49 @@ async function deleteCategory(id, name) {
 
 async function addSupplier() {
   openModal('添加供应商', `
-    <div class="form-group">
-      <label class="form-label"><span class="req">*</span> 供应商名称</label>
-      <input class="form-input" id="supName" placeholder="请输入供应商名称">
-    </div>
-    <div class="form-group">
-      <label class="form-label">联系人</label>
-      <input class="form-input" id="supContact">
-    </div>
-    <div class="form-group">
-      <label class="form-label">电话</label>
-      <input class="form-input" id="supPhone">
-    </div>
-    <div class="form-group">
-      <label class="form-label">备注</label>
-      <textarea class="form-input form-textarea" id="supNote"></textarea>
-    </div>
+    <div class="form-group"><label class="form-label"><span class="req">*</span> 供应商名称</label><input class="form-input" id="supName" placeholder="请输入供应商名称"></div>
+    <div class="form-group"><label class="form-label">联系人</label><input class="form-input" id="supContact"></div>
+    <div class="form-group"><label class="form-label">电话</label><input class="form-input" id="supPhone"></div>
+    <div class="form-group"><label class="form-label">备注</label><textarea class="form-input form-textarea" id="supNote"></textarea></div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-    <button class="btn btn-primary" onclick="saveSupplier()">保存</button>
+    <button class="btn btn-primary" id="saveSupBtn">保存</button>
   `);
-}
-
-async function saveSupplier(editId = null) {
-  const name = $('#supName').value.trim();
-  if (!name) { showToast('请输入供应商名称'); return; }
-  const data = { name, contact: $('#supContact').value.trim(), phone: $('#supPhone').value.trim(), note: $('#supNote').value.trim() };
-  if (editId) data.id = editId;
-  else {
-    try {
-      const existing = await dbGetByIndex('suppliers', 'name', name);
-      if (existing.length > 0) { showToast('该供应商已存在'); return; }
-    } catch (e) {}
-  }
-  await dbPut('suppliers', data);
-  closeModal();
-  showToast(editId ? '已更新' : '已添加', 'success');
-  renderSettings();
+  $('#saveSupBtn').addEventListener('click', async () => {
+    const name = $('#supName').value.trim();
+    if (!name) { showToast('请输入供应商名称'); return; }
+    await dbPut('suppliers', { name, contact: $('#supContact').value.trim(), phone: $('#supPhone').value.trim(), note: $('#supNote').value.trim() });
+    closeModal();
+    showToast('已添加', 'success');
+    renderSettings();
+  });
 }
 
 async function editSupplier(id) {
   const s = await dbGet('suppliers', id);
   if (!s) return;
   openModal('编辑供应商', `
-    <div class="form-group">
-      <label class="form-label"><span class="req">*</span> 供应商名称</label>
-      <input class="form-input" id="supName" value="${escHtml(s.name)}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">联系人</label>
-      <input class="form-input" id="supContact" value="${escHtml(s.contact || '')}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">电话</label>
-      <input class="form-input" id="supPhone" value="${escHtml(s.phone || '')}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">备注</label>
-      <textarea class="form-input form-textarea" id="supNote">${escHtml(s.note || '')}</textarea>
-    </div>
+    <div class="form-group"><label class="form-label"><span class="req">*</span> 供应商名称</label><input class="form-input" id="supName" value="${escHtml(s.name)}"></div>
+    <div class="form-group"><label class="form-label">联系人</label><input class="form-input" id="supContact" value="${escHtml(s.contact||'')}"></div>
+    <div class="form-group"><label class="form-label">电话</label><input class="form-input" id="supPhone" value="${escHtml(s.phone||'')}"></div>
+    <div class="form-group"><label class="form-label">备注</label><textarea class="form-input form-textarea" id="supNote">${escHtml(s.note||'')}</textarea></div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-    <button class="btn btn-primary" onclick="saveSupplier(${id})">保存</button>
+    <button class="btn btn-primary" id="saveSupEditBtn">保存</button>
   `);
+  $('#saveSupEditBtn').addEventListener('click', async () => {
+    s.name = $('#supName').value.trim(); s.contact = $('#supContact').value.trim();
+    s.phone = $('#supPhone').value.trim(); s.note = $('#supNote').value.trim();
+    if (!s.name) { showToast('请输入供应商名称'); return; }
+    await dbPut('suppliers', s);
+    closeModal();
+    showToast('已更新', 'success');
+    renderSettings();
+  });
 }
 
 async function deleteSupplier(id, name) {
-  const ok = await confirm(`确定删除供应商「${name}」吗？`, '删除供应商');
-  if (!ok) return;
+  if (!await confirm('确定删除供应商「' + name + '」吗？', '删除供应商')) return;
   await dbDelete('suppliers', id);
   showToast('已删除', 'success');
   renderSettings();
@@ -1358,91 +1650,40 @@ async function deleteSupplier(id, name) {
 async function exportExcel() {
   const products = await dbGetAll('products');
   const transactions = await dbGetAll('transactions');
-
-  if (products.length === 0 && transactions.length === 0) {
-    showToast('暂无数据可导出');
-    return;
-  }
-
   const wb = XLSX.utils.book_new();
-
-  const pData = products.map(p => ({
-    'SKU': p.sku || '',
-    '商品名称': p.name || '',
-    '品牌': p.brand || '',
-    '尺码': p.size || '',
-    '颜色': p.color || '',
-    '分类': p.category || '',
-    '供应商': p.supplier || '',
-    '库存': p.stock || 0,
-    '最低库存': p.minStock || '',
-    '成本价': p.cost || '',
-    '零售价': p.price || '',
-    '库位': p.location || '',
-    '备注': p.note || '',
-    '创建时间': p.createdAt ? fmtDate(p.createdAt) : '',
-    '更新时间': p.updatedAt ? fmtDate(p.updatedAt) : ''
-  }));
-  if (pData.length > 0) {
-    const pws = XLSX.utils.json_to_sheet(pData);
-    const pcols = Object.keys(pData[0]).map((k, i) => ({ wch: Math.max(k.length * 2, 12) }));
-    pws['!cols'] = pcols;
-    XLSX.utils.book_append_sheet(wb, pws, '商品列表');
+  const pRows = [];
+  for (const p of products) {
+    const variants = await getProductVariants(p.id);
+    if (variants.length === 0) {
+      pRows.push({ 'SKU': p.sku || '', '商品名称': p.name || '', '品牌': p.brand || '', '尺码': '', '库存': 0, '颜色': p.color || '', '分类': p.category || '', '供应商': p.supplier || '', '最低库存': p.minStock || '', '成本价': p.cost || '', '零售价': p.price || '', '库位': p.location || '', '备注': p.note || '' });
+    } else {
+      for (const v of variants) {
+        pRows.push({ 'SKU': p.sku || '', '商品名称': p.name || '', '品牌': p.brand || '', '尺码': v.size, '库存': v.stock || 0, '颜色': p.color || '', '分类': p.category || '', '供应商': p.supplier || '', '最低库存': p.minStock || '', '成本价': p.cost || '', '零售价': p.price || '', '库位': p.location || '', '备注': p.note || '' });
+      }
+    }
   }
-
-  const tData = transactions.map(t => {
-    const p = products.find(x => x.id === t.productId);
-    return {
-      '类型': t.type === 'in' ? '入库' : '出库',
-      '商品名称': p?.name || '',
-      'SKU': t.sku || '',
-      '数量': t.quantity,
-      '供应商/去向': t.supplier || t.destination || '',
-      '备注': t.note || '',
-      '时间': fmtDate(t.createdAt)
-    };
-  });
-  if (tData.length > 0) {
-    const tws = XLSX.utils.json_to_sheet(tData);
-    const tcols = Object.keys(tData[0]).map((k, i) => ({ wch: Math.max(k.length * 2, 12) }));
-    tws['!cols'] = tcols;
-    XLSX.utils.book_append_sheet(wb, tws, '出入库记录');
-  }
-
-  XLSX.writeFile(wb, `靴履云仓_数据导出_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if (pRows.length > 0) { const pws = XLSX.utils.json_to_sheet(pRows); pws['!cols'] = Object.keys(pRows[0]).map((k, i) => ({ wch: Math.max(k.length * 2, 10) })); XLSX.utils.book_append_sheet(wb, pws, '商品列表(含尺码)'); }
+  const tData = transactions.map(t => { const p = products.find(x => x.id === t.productId); return { '类型': t.type === 'in' ? '入库' : '出库', '商品名称': p?.name || '', 'SKU': t.sku || '', '尺码': t.size || '', '数量': t.quantity, '供应商/去向': t.supplier || t.destination || '', '备注': t.note || '', '时间': fmtDate(t.createdAt) }; });
+  if (tData.length > 0) { const tws = XLSX.utils.json_to_sheet(tData); tws['!cols'] = Object.keys(tData[0]).map((k, i) => ({ wch: Math.max(k.length * 2, 12) })); XLSX.utils.book_append_sheet(wb, tws, '出入库记录'); }
+  if (pRows.length === 0 && tData.length === 0) { showToast('暂无数据可导出'); return; }
+  XLSX.writeFile(wb, '靴履云仓_数据导出_' + new Date().toISOString().slice(0,10) + '.xlsx');
   showToast('导出成功', 'success');
 }
 
 // ============ Excel Import ============
 async function showImportExcel() {
   openModal('从 Excel 导入', `
-    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6">导入 Excel 文件批量添加商品。文件需包含以下列：<b>商品名称、SKU</b>（必填），以及品牌、尺码、颜色、分类、供应商、库存、成本价、零售价、库位、备注（选填）。</p>
-    <div class="card" style="background:var(--warning-light);margin-bottom:12px">
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">⚠ 注意事项</div>
-      <div style="font-size:12px;line-height:1.5">- 第一行将被视为表头<br>- SKU重复的记录将被跳过<br>- 库存列如不填则默认为0</div>
-    </div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6">导入 Excel 文件批量添加商品。每行代表一个SKU-尺码组合。<br>必填列：<b>商品名称、SKU、尺码</b>。同一SKU可有多行（不同尺码），自动合并到同一商品下。<br>其他可选列：品牌、颜色、分类、供应商、库存、成本价、零售价、库位、备注。</p>
+    <div class="card" style="background:var(--warning-light);margin-bottom:12px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">⚠ 注意事项</div><div style="font-size:12px;line-height:1.5">- 第一行为表头<br>- 同一SKU多行会自动合并为商品+多尺码<br>- SKU已存在的情况下新尺码会追加，已有尺码不会覆盖</div></div>
     <button class="btn btn-secondary btn-block" onclick="downloadTemplate()">下载导入模板</button>
     <button class="btn btn-primary btn-block" style="margin-top:8px" onclick="document.getElementById('excelFileInput').click()">选择 Excel 文件导入</button>
     <div id="importResult" style="margin-top:12px"></div>
-  `, `<button class="btn btn-secondary" onclick="closeModal()">关闭</button>`);
+  `, '<button class="btn btn-secondary" onclick="closeModal()">关闭</button>');
 }
 
 function downloadTemplate() {
   const wb = XLSX.utils.book_new();
-  const data = [{
-    '商品名称': '示例运动鞋',
-    'SKU': 'SPORT-001',
-    '品牌': '示例品牌',
-    '尺码': '42',
-    '颜色': '黑色',
-    '分类': '运动鞋',
-    '供应商': '示例供应商',
-    '库存': 100,
-    '成本价': 89.00,
-    '零售价': 299.00,
-    '库位': 'A-01-03',
-    '备注': '这是一条示例数据'
-  }];
+  const data = [{ 'SKU': 'SPORT-001', '商品名称': '示例运动鞋', '品牌': '示例品牌', '尺码': 39, '库存': 50, '颜色': '黑色', '分类': '运动鞋', '供应商': '示例供应商', '成本价': 89.00, '零售价': 299.00, '库位': 'A-01-03', '备注': '尺码与库存一一对应' }, { 'SKU': 'SPORT-001', '商品名称': '示例运动鞋', '品牌': '示例品牌', '尺码': 40, '库存': 80, '颜色': '黑色', '分类': '运动鞋', '供应商': '示例供应商', '成本价': 89.00, '零售价': 299.00, '库位': 'A-01-03', '备注': '同一SKU不同尺码' }];
   const ws = XLSX.utils.json_to_sheet(data);
   XLSX.utils.book_append_sheet(wb, ws, '商品导入模板');
   XLSX.writeFile(wb, '靴履云仓_导入模板.xlsx');
@@ -1453,154 +1694,125 @@ $('#excelFileInput').addEventListener('change', async function() {
   const file = this.files[0];
   if (!file) return;
   this.value = '';
-
   try {
-    const data = await readFileAsBuffer(file);
-    const wb = XLSX.read(data, { type: 'array' });
+    const raw = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(new Uint8Array(reader.result)); reader.onerror = reject; reader.readAsArrayBuffer(file); });
+    const wb = XLSX.read(raw, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws);
     if (rows.length === 0) { showToast('文件中没有数据'); return; }
 
-    let imported = 0;
-    let skipped = 0;
-    const errors = [];
-
+    let imported = 0, skipped = 0;
+    const skuGroups = {};
     for (const row of rows) {
       const name = (row['商品名称'] || row['名称'] || '').toString().trim();
       const sku = (row['SKU'] || row['sku'] || row['货号'] || '').toString().trim();
-      if (!name || !sku) { skipped++; errors.push(`缺少商品名称或SKU (行数据: ${JSON.stringify(row).slice(0,60)})`); continue; }
-
-      const existing = await dbGetByIndex('products', 'sku', sku);
-      if (existing.length > 0) { skipped++; continue; }
-
-      await dbPut('products', {
-        name,
-        sku,
-        brand: (row['品牌'] || '').toString().trim(),
-        size: (row['尺码'] || '').toString().trim(),
-        color: (row['颜色'] || '').toString().trim(),
-        category: (row['分类'] || '').toString().trim(),
-        supplier: (row['供应商'] || '').toString().trim(),
-        stock: parseInt(row['库存']) || 0,
-        cost: parseFloat(row['成本价']) || null,
-        price: parseFloat(row['零售价']) || null,
-        location: (row['库位'] || '').toString().trim(),
-        note: (row['备注'] || '').toString().trim(),
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
-      imported++;
+      const size = (row['尺码'] !== undefined && row['尺码'] !== '') ? String(row['尺码']).trim() : null;
+      if (!name || !sku) { skipped++; continue; }
+      if (!skuGroups[sku]) {
+        skuGroups[sku] = { name, sku, brand: (row['品牌'] || '').toString().trim(), color: (row['颜色'] || '').toString().trim(), category: (row['分类'] || '').toString().trim(), supplier: (row['供应商'] || '').toString().trim(), minStock: parseInt(row['最低库存']) || null, cost: parseFloat(row['成本价']) || null, price: parseFloat(row['零售价']) || null, location: (row['库位'] || '').toString().trim(), note: (row['备注'] || '').toString().trim(), variants: [] };
+      }
+      if (size) skuGroups[sku].variants.push({ size, stock: parseInt(row['库存']) || 0 });
+      if (!skuGroups[sku].brand) skuGroups[sku].brand = (row['品牌'] || '').toString().trim();
+      if (!skuGroups[sku].color) skuGroups[sku].color = (row['颜色'] || '').toString().trim();
+      if (!skuGroups[sku].category) skuGroups[sku].category = (row['分类'] || '').toString().trim();
+      if (!skuGroups[sku].supplier) skuGroups[sku].supplier = (row['供应商'] || '').toString().trim();
     }
 
-    const resultDiv = $('#importResult');
-    resultDiv.innerHTML = `
-      <div class="card" style="background:${imported > 0 ? 'var(--success-light)' : 'var(--warning-light)'}">
-        <div style="font-size:14px;font-weight:500">导入完成</div>
-        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">成功导入 <b>${imported}</b> 条，跳过 <b>${skipped}</b> 条</div>
-        ${errors.slice(0, 3).map(e => `<div style="font-size:11px;color:var(--danger);margin-top:4px">${e}</div>`).join('')}
-      </div>
-    `;
-    if (imported > 0) {
-      showToast(`成功导入 ${imported} 条商品`, 'success');
-      if (currentPage === 'products') renderProducts({});
-      if (currentPage === 'dashboard') renderDashboard();
+    // Pre-resolve existing products OUTSIDE any transaction
+    const existingProducts = {};
+    const existingVariantsMap = {};
+    for (const sku of Object.keys(skuGroups)) {
+      const ex = await dbGetByIndex('products', 'sku', sku);
+      if (ex.length > 0) { existingProducts[sku] = ex[0].id; const ev = await dbGetByIndex('product_variants', 'productId', ex[0].id); existingVariantsMap[sku] = new Set(ev.map(v => String(v.size))); }
     }
-  } catch (err) {
-    showToast('读取文件失败：' + err.message);
-  }
+
+    const entries = Object.entries(skuGroups);
+    function processBatch(idx) {
+      if (idx >= entries.length) {
+        $('#importResult').innerHTML = '<div class="card" style="background:' + (imported > 0 ? 'var(--success-light)' : 'var(--warning-light)') + '"><div style="font-weight:500">导入完成</div><div style="font-size:13px;color:var(--text-secondary);margin-top:4px">成功导入 <b>' + imported + '</b> 个商品，跳过 <b>' + skipped + '</b> 行</div></div>';
+        if (imported > 0) { showToast('成功导入 ' + imported + ' 个商品', 'success'); refreshCurrentPage(); }
+        return;
+      }
+      const [sku, group] = entries[idx];
+      if (group.variants.length === 0) { skipped++; processBatch(idx + 1); return; }
+
+      const tx = db.transaction(['products', 'product_variants'], 'readwrite');
+      const pStore = tx.objectStore('products');
+      const vStore = tx.objectStore('product_variants');
+
+      if (existingProducts[sku]) {
+        const pid = existingProducts[sku];
+        const existSizes = existingVariantsMap[sku] || new Set();
+        for (const v of group.variants) { if (!existSizes.has(String(v.size))) { vStore.add({ productId: pid, size: v.size, stock: v.stock, createdAt: Date.now() }); } }
+      } else {
+        const pd = { name: group.name, sku: group.sku, brand: group.brand, color: group.color, category: group.category, supplier: group.supplier, minStock: group.minStock, cost: group.cost, price: group.price, location: group.location, note: group.note, createdAt: Date.now(), updatedAt: Date.now() };
+        const req = pStore.add(pd);
+        req.onsuccess = () => { const pid = req.result; for (const v of group.variants) { vStore.add({ productId: pid, size: v.size, stock: v.stock, createdAt: Date.now() }); } };
+      }
+
+      tx.oncomplete = () => { imported++; processBatch(idx + 1); };
+      tx.onerror = () => { skipped++; processBatch(idx + 1); };
+    }
+    processBatch(0);
+  } catch (err) { showToast('读取文件失败：' + err.message); }
 });
-
-function readFileAsBuffer(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(new Uint8Array(reader.result));
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
 
 // ============ Backup & Restore ============
 async function exportBackup() {
-  const data = {
-    version: '1.0',
-    exportedAt: Date.now(),
-    products: await dbGetAll('products'),
-    transactions: await dbGetAll('transactions'),
-    categories: await dbGetAll('categories'),
-    suppliers: await dbGetAll('suppliers'),
-    settings: await dbGetAll('settings')
-  };
+  const data = { version: '2.0', exportedAt: Date.now(), products: await dbGetAll('products'), product_variants: await (async () => { try { return await dbGetAll('product_variants'); } catch(e) { return []; } })(), transactions: await dbGetAll('transactions'), categories: await dbGetAll('categories'), suppliers: await dbGetAll('suppliers'), settings: await dbGetAll('settings') };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `靴履云仓_备份_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
+  a.href = url; a.download = '靴履云仓_备份_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
   URL.revokeObjectURL(url);
   showToast('备份已下载', 'success');
 }
 
 async function restoreBackup() {
-  const ok = await confirm('恢复备份将覆盖当前所有数据（商品、记录、分类、供应商、设置）。此操作不可撤销，建议先导出备份。', '恢复备份');
-  if (!ok) return;
-
+  if (!await confirm('恢复备份将覆盖当前所有数据。此操作不可撤销！\n建议先导出当前数据作为备份。', '恢复备份')) return;
   const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
+  input.type = 'file'; input.accept = '.json';
   input.onchange = async function() {
     const file = this.files[0];
     if (!file) return;
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-      if (!data.products || !data.transactions) { showToast('备份文件格式不正确'); return; }
-
-      await dbClear('products');
-      await dbClear('transactions');
-      await dbClear('categories');
-      await dbClear('suppliers');
-      await dbClear('settings');
-
-      const tx = db.transaction(['products', 'transactions', 'categories', 'suppliers', 'settings'], 'readwrite');
-      for (const p of data.products) tx.objectStore('products').put(p);
-      for (const t of data.transactions) tx.objectStore('transactions').put(t);
+      await dbClear('products'); await dbClear('product_variants'); await dbClear('transactions'); await dbClear('categories'); await dbClear('suppliers'); await dbClear('settings');
+      const tx = db.transaction(['products', 'product_variants', 'transactions', 'categories', 'suppliers', 'settings'], 'readwrite');
+      for (const p of (data.products || [])) tx.objectStore('products').put(p);
+      for (const v of (data.product_variants || [])) tx.objectStore('product_variants').put(v);
+      for (const t of (data.transactions || [])) tx.objectStore('transactions').put(t);
       for (const c of (data.categories || [])) tx.objectStore('categories').put(c);
       for (const s of (data.suppliers || [])) tx.objectStore('suppliers').put(s);
       for (const s of (data.settings || [])) tx.objectStore('settings').put(s);
-
-      tx.oncomplete = () => {
-        showToast('数据已恢复', 'success');
-        navigateTo('dashboard');
-      };
+      tx.oncomplete = () => { showToast('数据已恢复', 'success'); navigateTo('dashboard'); };
       tx.onerror = () => showToast('恢复失败');
-    } catch (err) {
-      showToast('读取备份文件失败：' + err.message);
-    }
+    } catch (err) { showToast('读取备份失败：' + err.message); }
   };
   input.click();
 }
 
-// ============ Photo handling ============
+// ============ Photo ============
 function handlePhotoPick(input, pickerId, dataId) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    const base64 = reader.result;
-    $(`#${dataId}`).value = base64;
-    const picker = $(`#${pickerId}`);
+    $('#' + dataId).value = reader.result;
+    const picker = $('#' + pickerId);
     picker.classList.add('has-photo');
-    picker.innerHTML = `<img src="${base64}" alt=""><span class="photo-remove" onclick="event.stopPropagation();clearPhoto('${pickerId}','${dataId}')">✕</span>`;
+    picker.innerHTML = '<img src="' + reader.result + '" alt=""><span class="photo-remove" onclick="event.stopPropagation();clearPhoto(\'' + pickerId + '\',\'' + dataId + '\')">✕</span>';
   };
   reader.readAsDataURL(file);
   input.value = '';
 }
 
 function clearPhoto(pickerId, dataId) {
-  $(`#${dataId}`).value = '';
-  const picker = $(`#${pickerId}`);
+  $('#' + dataId).value = '';
+  const picker = $('#' + pickerId);
   picker.classList.remove('has-photo');
-  picker.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:13px">点击拍照或选择图片</span>`;
+  picker.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:13px">点击拍照或选择图片</span>';
 }
 
 // ============ HTML escape ============
@@ -1609,26 +1821,25 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ============ Service Worker ============
+if ('serviceWorker' in navigator) {
+  const swBlob = new Blob(["const CACHE='shoe-wh-v3';self.addEventListener('install',e=>{e.waitUntil(self.skipWaiting())});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok){const c=res.clone();caches.open(CACHE).then(ca=>ca.put(e.request,c))}return res})))})"], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+}
+
 // ============ Init ============
 async function init() {
   try {
     await openDB();
+    await migrateOldData();
     navigateTo('dashboard');
-
     window.addEventListener('online', () => showToast('网络已连接', 'success'));
     window.addEventListener('offline', () => showToast('已离线，数据保存在本地'));
   } catch (err) {
-    $('#mainContent').innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">⚠</div>
-        <h3>初始化失败</h3>
-        <p>${err.message}。请尝试刷新页面。</p>
-      </div>
-    `;
+    $('#mainContent').innerHTML = '<div class="empty"><div class="empty-icon">⚠</div><h3>初始化失败</h3><p>' + escHtml(err.message) + '。请尝试刷新页面。</p></div>';
   }
 }
 
-init();
-</script>
+init();</script>
 </body>
 </html>
