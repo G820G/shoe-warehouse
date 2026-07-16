@@ -1595,6 +1595,22 @@ async function renderSettings() {
           </div>
           <span class="setting-arrow">›</span>
         </div>
+        <div class="setting-item" onclick="shareJSON()">
+          <div class="setting-icon" style="background:var(--accent-light);color:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">一键分享数据</div>
+            <div class="setting-desc">导出 JSON 文件，通过蓝牙/微信/QQ 发送</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
+        <div class="setting-item" onclick="receiveJSON()">
+          <div class="setting-icon" style="background:#ECFDF5;color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div class="setting-info">
+            <div class="setting-name">一键接收数据</div>
+            <div class="setting-desc">选择对方发来的 JSON 文件导入</div>
+          </div>
+          <span class="setting-arrow">›</span>
+        </div>
         <div class="setting-item" onclick="showQRSyncSend()">
           <div class="setting-icon" style="background:var(--accent-light);color:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="14.01"/></svg></div>
           <div class="setting-info">
@@ -1876,8 +1892,8 @@ async function restoreBackup() {
   input.click();
 }
 
-// ============ QR Sync - Send ============
-async function showQRSyncSend() {
+// ============ JSON Share / Receive ============
+async function shareJSON() {
   var data = {
     v: '2.0', t: Date.now(),
     products: await dbGetAll('products'),
@@ -1888,9 +1904,91 @@ async function showQRSyncSend() {
     settings: await dbGetAll('settings')
   };
   var json = JSON.stringify(data);
+  var blob = new Blob([json], { type: 'application/json' });
+  var file = new File([blob], '靴履云仓_数据分享_' + new Date().toISOString().slice(0,10) + '.json', { type: 'application/json' });
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({
+      title: '靴履云仓数据',
+      text: '靴履云仓同步数据文件',
+      files: [file]
+    }).then(function() {
+      showToast('已分享', 'success');
+    }).catch(function(err) {
+      if (err.name !== 'AbortError') fallbackShare(json);
+    });
+  } else {
+    fallbackShare(json);
+  }
+}
+
+function fallbackShare(json) {
+  var blob = new Blob([json], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '靴履云仓_数据分享_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('文件已下载，请通过其他方式发送给对方', 'success');
+}
+
+async function receiveJSON() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async function() {
+    var file = input.files[0];
+    if (!file) return;
+    try {
+      var text = await file.text();
+      var data = JSON.parse(text);
+
+      if (!data.products || typeof data.products !== 'object') {
+        showToast('文件格式不正确，请确认是靴履云仓导出的数据文件');
+        return;
+      }
+
+      await confirmAndImport(data);
+    } catch (err) {
+      showToast('读取文件失败: ' + err.message);
+    }
+  };
+  input.click();
+}
+
+// ============ QR Sync - Send ============
+async function showQRSyncSend() {
+  // Strip photo fields to keep data small (photos are base64 and huge)
+  var products = await dbGetAll('products');
+  var variants = await dbGetAll('product_variants');
+  var transactions = await dbGetAll('transactions');
+  var categories = await dbGetAll('categories');
+  var suppliers = await dbGetAll('suppliers');
+  var settings = await dbGetAll('settings');
+
+  // Remove photo fields from products and transactions
+  products = products.map(function(p) { var o = {}; for (var k in p) { if (k !== 'photo') o[k] = p[k]; } return o; });
+  transactions = transactions.map(function(t) { var o = {}; for (var k in t) { if (k !== 'photo') o[k] = t[k]; } return o; });
+
+  // Also strip any large binary fields from variants
+  variants = variants.map(function(v) { return { productId: v.productId, size: v.size, stock: v.stock, id: v.id }; });
+
+  var data = { v: '2.0', t: Date.now(), products: products, variants: variants, transactions: transactions, categories: categories, suppliers: suppliers, settings: settings };
+  var json = JSON.stringify(data);
+  var jsonKB = (json.length / 1024).toFixed(1);
+
+  // If data is small enough for a single QR code
+  if (json.length <= 2500) {
+    showQRSingle(json, jsonKB, '图片已剥离（数据不含照片），可扫码或复制');
+    return;
+  }
+
+  // Compress and check
   var compressed = pako.deflate(json, { level: 9 });
 
-  // Convert to base64 safely
   function uint8ToBase64(bytes) {
     var len = bytes.byteLength || bytes.length;
     var arr = new Uint8Array(bytes);
@@ -1903,17 +2001,26 @@ async function showQRSyncSend() {
     return btoa(bin);
   }
   var base64 = uint8ToBase64(compressed);
+  var compKB = (compressed.length / 1024).toFixed(1);
 
-  // Split into chunks (each fits in a QR code)
+  // Calculate pages needed
   var CHUNK_SIZE = 1200;
+  var total = Math.ceil(base64.length / CHUNK_SIZE);
+
+  // If more than 10 pages, offer copy-to-clipboard as primary method
+  if (total > 10) {
+    showQRCopyAlternative(json, jsonKB, compKB);
+    return;
+  }
+
+  // Split into chunks for QR
   var chunks = [];
   for (var i = 0; i < base64.length; i += CHUNK_SIZE) {
     chunks.push(base64.slice(i, i + CHUNK_SIZE));
   }
-  var total = chunks.length;
 
-  openModal('发送数据 (' + (json.length/1024).toFixed(1) + 'KB)', `
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">共 <b>${total}</b> 张二维码。接收方逐一扫描。</p>
+  openModal('发送数据（已剥离照片）', `
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">${jsonKB}KB → ${compKB}KB 压缩 · 共 <b>${total}</b> 页。注：数据<b>不含商品照片</b>，如需同步照片请用备份功能。</p>
     <div style="text-align:center;margin-bottom:8px">
       <span style="font-size:12px;color:var(--text-secondary)">第 </span>
       <span style="font-size:18px;font-weight:700;font-family:var(--font-mono)" id="qrPageNum">1</span>
@@ -1927,38 +2034,103 @@ async function showQRSyncSend() {
   `, '<button class="btn btn-secondary" onclick="closeModal()">关闭</button>');
 
   var currentPage = 0;
-
   function renderQR(idx) {
     var header = String.fromCharCode(48 + total) + String.fromCharCode(48 + idx);
     var text = header + chunks[idx];
     var container = $('#qrContainer');
     container.innerHTML = '';
-
-    // Use qrserver API to generate QR code as image
     var img = document.createElement('img');
     img.style.display = 'block';
     img.style.margin = '0 auto';
     img.style.maxWidth = '100%';
     img.style.width = Math.min(300, window.innerWidth - 80) + 'px';
-    // URL-encode the data, use Google Charts QR API (reliable, no library needed)
-    var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(text);
-    img.src = qrUrl;
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(text);
     img.onerror = function() {
-      // Fallback: try google charts
       img.src = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' + encodeURIComponent(text) + '&choe=UTF-8';
     };
     container.appendChild(img);
-
     $('#qrPageNum').textContent = idx + 1;
     $('#qrPrevBtn').disabled = idx === 0;
     $('#qrNextBtn').disabled = idx >= total - 1;
     currentPage = idx;
   }
-
   renderQR(0);
 
   $('#qrPrevBtn').addEventListener('click', function() { if (currentPage > 0) renderQR(currentPage - 1); });
   $('#qrNextBtn').addEventListener('click', function() { if (currentPage < total - 1) renderQR(currentPage + 1); });
+}
+
+function showQRSingle(json, jsonKB, note) {
+  openModal('发送数据（已剥离照片）', `
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">${jsonKB}KB · 1 张二维码即可完成。注：数据<b>不含商品照片</b>。</p>
+    <div style="text-align:center" id="qrContainer"></div>
+  `, '<button class="btn btn-secondary" onclick="closeModal()">关闭</button>');
+  var container = $('#qrContainer');
+  var img = document.createElement('img');
+  img.style.display = 'block';
+  img.style.margin = '0 auto';
+  img.style.maxWidth = '100%';
+  img.style.width = Math.min(300, window.innerWidth - 80) + 'px';
+  // Direct JSON in a single QR (no compression needed for small data)
+  var prefix = 'J'; // marker: direct JSON mode
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(prefix + json);
+  img.onerror = function() {
+    img.src = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' + encodeURIComponent(prefix + json) + '&choe=UTF-8';
+  };
+  container.appendChild(img);
+}
+
+function showQRCopyAlternative(json, jsonKB, compKB) {
+  // Use clipboard copy as the primary method
+  openModal('数据过大（' + jsonKB + 'KB）', `
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">
+      数据量较大超过二维码限制。建议使用以下方式之一：
+    </p>
+    <div class="card" style="background:var(--warning-light);margin-bottom:12px;font-size:12px;line-height:1.5">
+      <b>方式一：复制数据文本</b><br>
+      点击下方按钮复制全部同步数据。通过微信/QQ等发给对方，对方在「扫码同步 - 接收」中粘贴即可。
+    </div>
+    <button class="btn btn-primary btn-block" id="qrCopyBtn">复制同步数据</button>
+    <div class="card" style="background:var(--bg);margin-top:12px;font-size:12px;line-height:1.5">
+      <b>方式二：使用备份文件</b><br>
+      在设置中点击「数据备份」导出 JSON 文件，发给对方后用「恢复备份」导入。备份包含完整数据（含照片）。
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text-secondary);text-align:center">数据已压缩至 ${compKB}KB（剥离照片后通常 < 50KB）</div>
+  `, '<button class="btn btn-secondary" onclick="closeModal()">关闭</button>');
+
+  $('#qrCopyBtn').addEventListener('click', function() {
+    // Copy compressed base64 for sharing
+    var compressed = pako.deflate(json, { level: 9 });
+    function uint8ToBase64(bytes) {
+      var len = bytes.byteLength || bytes.length;
+      var arr = new Uint8Array(bytes);
+      var bin = '';
+      var step = 4096;
+      for (var i = 0; i < len; i += step) {
+        bin += String.fromCharCode.apply(null, Array.prototype.slice.call(arr, i, Math.min(i + step, len)));
+      }
+      return btoa(bin);
+    }
+    var text = 'SHOE_SYNC:' + uint8ToBase64(compressed);
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('已复制（' + (text.length/1024).toFixed(1) + 'KB），发送给接收方', 'success');
+      }).catch(function() {
+        showAltCopy(text);
+      });
+    } else {
+      showAltCopy(text);
+    }
+  });
+
+  function showAltCopy(text) {
+    openModal('手动复制', `
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">长按选中下方全部文本，复制后发给对方</p>
+      <textarea readonly style="width:100%;height:120px;font-size:11px;font-family:monospace;padding:8px;border-radius:var(--radius-sm);background:var(--bg);border:1px solid var(--border)">${text}</textarea>
+      <p style="font-size:11px;color:var(--text-secondary);margin-top:8px">对方收到后，在「扫码同步 - 接收」中点击「粘贴同步数据」按钮。</p>
+    `, '<button class="btn btn-secondary" onclick="closeModal()">关闭</button>');
+  }
 }
 
 // ============ QR Sync - Receive ============
@@ -2064,6 +2236,17 @@ function stopQRScan() {
 }
 
 function processQRChunk(raw) {
+  if (raw.length < 1) return;
+
+  // Check if it's direct JSON mode (starts with 'J')
+  if (raw.charAt(0) === 'J') {
+    // Direct JSON
+    var json = raw.slice(1);
+    processSyncJSON(json);
+    return;
+  }
+
+  // Legacy multi-page mode
   if (raw.length < 2) return;
   const total = raw.charCodeAt(0) - 48;
   const index = raw.charCodeAt(1) - 48;
@@ -2086,70 +2269,93 @@ function processQRChunk(raw) {
   }
 }
 
+async function processSyncJSON(jsonStr) {
+  try {
+    var data = JSON.parse(jsonStr);
+    await confirmAndImport(data);
+  } catch(err) {
+    showToast('数据解析失败: ' + err.message);
+  }
+}
+
+async function confirmAndImport(data) {
+  if (!await confirm(
+    '即将导入数据：\n- ' + (data.products?.length || 0) + ' 件商品\n- ' + (data.variants?.length || 0) + ' 个尺码\n- ' + (data.transactions?.length || 0) + ' 条记录\n\n这将<b>覆盖</b>当前所有数据。确认导入？',
+    '同步确认'
+  )) return;
+
+  stopQRScan();
+  if ($('#modalOverlay').classList.contains('open')) closeModal();
+
+  await dbClear('products');
+  await dbClear('product_variants');
+  await dbClear('transactions');
+  await dbClear('categories');
+  await dbClear('suppliers');
+  await dbClear('settings');
+
+  var tx = db.transaction(['products', 'product_variants', 'transactions', 'categories', 'suppliers', 'settings'], 'readwrite');
+  for (var i = 0; i < (data.products || []).length; i++) tx.objectStore('products').put(data.products[i]);
+  for (var i = 0; i < (data.variants || []).length; i++) tx.objectStore('product_variants').put(data.variants[i]);
+  for (var i = 0; i < (data.transactions || []).length; i++) tx.objectStore('transactions').put(data.transactions[i]);
+  for (var i = 0; i < (data.categories || []).length; i++) tx.objectStore('categories').put(data.categories[i]);
+  for (var i = 0; i < (data.suppliers || []).length; i++) tx.objectStore('suppliers').put(data.suppliers[i]);
+  for (var i = 0; i < (data.settings || []).length; i++) tx.objectStore('settings').put(data.settings[i]);
+
+  tx.oncomplete = function() {
+    showToast('数据同步完成！（照片未同步）', 'success');
+    qrScanPieces = {}; qrScanTotal = 0; qrScanCount = 0;
+    navigateTo('dashboard');
+  };
+  tx.onerror = function() { showToast('同步失败'); };
+}
+
 async function finishQRReceive() {
   stopQRScan();
-  if ($('#modalOverlay').classList.contains('open')) {
-    closeModal();
-  }
+  if ($('#modalOverlay').classList.contains('open')) closeModal();
 
-  let base64 = '';
-  for (let i = 0; i < qrScanTotal; i++) {
-    if (!qrScanPieces[i]) {
-      showToast('数据不完整：缺少第 ' + (i + 1) + ' 页');
-      return;
-    }
+  var base64 = '';
+  for (var i = 0; i < qrScanTotal; i++) {
+    if (!qrScanPieces[i]) { showToast('数据不完整：缺少第 ' + (i + 1) + ' 页'); return; }
     base64 += qrScanPieces[i];
   }
 
   try {
-    const compressed = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-    const json = pako.inflate(compressed, { to: 'string' });
-    const data = JSON.parse(json);
-
-    if (!await confirm(
-      '即将导入以下数据：\n- ' + (data.products?.length || 0) + ' 件商品\n- ' + (data.variants?.length || 0) + ' 个尺码\n- ' + (data.transactions?.length || 0) + ' 条记录\n- ' + (data.categories?.length || 0) + ' 个分类\n- ' + (data.suppliers?.length || 0) + ' 个供应商\n\n这将<b>覆盖</b>当前所有数据，不可撤销。确认导入？',
-      '扫码同步确认'
-    )) return;
-
-    await dbClear('products');
-    await dbClear('product_variants');
-    await dbClear('transactions');
-    await dbClear('categories');
-    await dbClear('suppliers');
-    await dbClear('settings');
-
-    const tx = db.transaction(['products', 'product_variants', 'transactions', 'categories', 'suppliers', 'settings'], 'readwrite');
-    for (const p of (data.products || [])) tx.objectStore('products').put(p);
-    for (const v of (data.variants || [])) tx.objectStore('product_variants').put(v);
-    for (const t of (data.transactions || [])) tx.objectStore('transactions').put(t);
-    for (const c of (data.categories || [])) tx.objectStore('categories').put(c);
-    for (const s of (data.suppliers || [])) tx.objectStore('suppliers').put(s);
-    for (const s of (data.settings || [])) tx.objectStore('settings').put(s);
-
-    tx.oncomplete = () => {
-      showToast('数据同步完成！', 'success');
-      qrScanPieces = {}; qrScanTotal = 0; qrScanCount = 0;
-      navigateTo('dashboard');
-    };
-    tx.onerror = () => showToast('同步失败');
+    var compressed = Uint8Array.from(atob(base64), function(c) { return c.charCodeAt(0); });
+    var json = pako.inflate(compressed, { to: 'string' });
+    var data = JSON.parse(json);
+    await confirmAndImport(data);
   } catch (err) {
     showToast('数据解析失败：' + err.message);
   }
 }
 
-// Manual input for QR data
-$('#qrManualInputBtn')?.addEventListener('click', () => {
-  // Deferred binding — handle at next tick after modal rendered
-});
+// Manual input & paste for QR/receive data
 document.addEventListener('click', function(e) {
   if (e.target.id === 'qrManualInputBtn') {
     e.stopPropagation();
-    const raw = prompt('请粘贴二维码内容（相机无法自动识别时使用）：');
+    var raw = prompt('二维码内容，或粘贴对方发来的同步文本（以 SHOE_SYNC: 开头）：');
     if (raw && raw.trim()) {
-      processQRChunk(raw.trim());
+      // Check if it's SHOE_SYNC clipboard data
+      if (raw.indexOf('SHOE_SYNC:') === 0) {
+        receiveClipboardSync(raw.slice(10));
+      } else {
+        processQRChunk(raw.trim());
+      }
     }
   }
 });
+
+async function receiveClipboardSync(base64) {
+  try {
+    var compressed = Uint8Array.from(atob(base64), function(c) { return c.charCodeAt(0); });
+    var json = pako.inflate(compressed, { to: 'string' });
+    var data = JSON.parse(json);
+    await confirmAndImport(data);
+  } catch (err) {
+    showToast('粘贴数据解析失败: ' + err.message);
+  }
+}
 
 // ============ Photo ============
 function handlePhotoPick(input, pickerId, dataId) {
