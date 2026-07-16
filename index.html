@@ -11,6 +11,7 @@
 <link rel="manifest" href="./manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 :root {
   --bg: #F5F3F0;
@@ -1890,66 +1891,77 @@ async function showQRSyncSend() {
   };
   const json = JSON.stringify(data);
   const compressed = pako.deflate(json, { level: 9 });
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(compressed)));
 
-  // Split into chunks (QR code max ~2900 bytes for reliable scanning)
-  const CHUNK_SIZE = 2000;
-  const chunks = [];
-  for (let i = 0; i < base64.length; i += CHUNK_SIZE) {
+  // Convert Uint8Array to base64 safely (avoid stack overflow from spread on mobile)
+  function uint8ToBase64(bytes) {
+    var bin = '';
+    var step = 8192;
+    for (var i = 0; i < bytes.length; i += step) {
+      bin += String.fromCharCode.apply(null, Array.prototype.slice.call(bytes, i, Math.min(i + step, bytes.length)));
+    }
+    return btoa(bin);
+  }
+  const base64 = uint8ToBase64(compressed);
+
+  // Split into chunks
+  var CHUNK_SIZE = 1500;
+  var chunks = [];
+  for (var i = 0; i < base64.length; i += CHUNK_SIZE) {
     chunks.push(base64.slice(i, i + CHUNK_SIZE));
   }
-  const total = chunks.length;
+  var total = chunks.length;
 
-  openModal(`发送数据 (${(json.length/1024).toFixed(1)}KB → ${(compressed.length/1024).toFixed(1)}KB)`, `
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">共 <b>${total}</b> 张二维码。在接收方手机上打开「扫码同步 - 接收」，逐一扫描。数据压缩后约 ${(compressed.length/1024).toFixed(1)}KB。</p>
+  openModal('发送数据 (' + (json.length/1024).toFixed(1) + 'KB → ' + (compressed.length/1024).toFixed(1) + 'KB)', `
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">共 <b>${total}</b> 张二维码。在接收方手机上打开「扫码同步 - 接收」，逐一扫描。</p>
     <div style="text-align:center;margin-bottom:8px">
       <span style="font-size:12px;color:var(--text-secondary)">第 </span>
       <span style="font-size:18px;font-weight:700;font-family:var(--font-mono)" id="qrPageNum">1</span>
       <span style="font-size:12px;color:var(--text-secondary)"> / ${total} 页</span>
     </div>
-    <canvas id="qrCanvas" style="display:block;margin:0 auto;max-width:100%"></canvas>
+    <div style="text-align:center" id="qrContainer"></div>
     <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
       <button class="btn btn-sm btn-secondary" id="qrPrevBtn" disabled>上一页</button>
       <button class="btn btn-sm btn-primary" id="qrNextBtn" ${total === 1 ? 'disabled' : ''}>下一页</button>
     </div>
   `, '<button class="btn btn-secondary" onclick="closeModal()">关闭</button>');
 
-  let currentPage = 0;
-  const canvas = $('#qrCanvas');
+  var currentPage = 0;
 
   function renderQR(idx) {
-    const header = String.fromCharCode(48 + total) + String.fromCharCode(48 + idx);
-    const payload = header + chunks[idx];
+    var header = String.fromCharCode(48 + total) + String.fromCharCode(48 + idx);
+    var payload = header + chunks[idx];
+    var container = $('#qrContainer');
+    container.innerHTML = '';
+    var canvas = document.createElement('canvas');
+    canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    canvas.style.maxWidth = '100%';
+    container.appendChild(canvas);
 
-    // Build QR manually using canvas (no external library needed)
-    const size = Math.min(350, window.innerWidth - 80);
-    const moduleCount = 33; // version 2 QR, holds up to ~3000 alphanumeric chars
-    const moduleSize = Math.floor(size / moduleCount);
-    const realSize = moduleSize * moduleCount;
-    canvas.width = realSize;
-    canvas.height = realSize;
-    const ctx = canvas.getContext('2d');
-
-    // Generate QR matrix using a simple encoder
-    try {
-      const qr = buildQRMatrix(payload, moduleCount);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, realSize, realSize);
-      ctx.fillStyle = '#1A1D23';
-      for (let row = 0; row < moduleCount; row++) {
-        for (let col = 0; col < moduleCount; col++) {
-          if (qr[row * moduleCount + col]) {
-            ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
-          }
-        }
-      }
-    } catch(err) {
+    if (typeof QRCode === 'undefined') {
+      var ctx = canvas.getContext('2d');
       canvas.width = 300; canvas.height = 40;
-      const ctx2 = canvas.getContext('2d');
-      ctx2.fillStyle = '#FFFFFF'; ctx2.fillRect(0, 0, 300, 40);
-      ctx2.fillStyle = '#DC2626'; ctx2.font = '13px sans-serif'; ctx2.textAlign = 'center';
-      ctx2.fillText('二维码生成失败: ' + err.message, 150, 26);
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 300, 40);
+      ctx.fillStyle = '#DC2626'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('QR库加载失败，请刷新页面', 150, 26);
+      return;
     }
+
+    QRCode.toCanvas(canvas, payload, {
+      width: Math.min(320, window.innerWidth - 80),
+      margin: 1,
+      errorCorrectionLevel: 'L',
+      color: { dark: '#1A1D23', light: '#FFFFFF' }
+    }, function(err) {
+      if (err) {
+        var ctx = canvas.getContext('2d');
+        canvas.width = 300; canvas.height = 40;
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 300, 40);
+        ctx.fillStyle = '#DC2626'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('生成失败: ' + (err.message || err), 150, 26);
+      }
+    });
+
     $('#qrPageNum').textContent = idx + 1;
     $('#qrPrevBtn').disabled = idx === 0;
     $('#qrNextBtn').disabled = idx >= total - 1;
@@ -1958,8 +1970,8 @@ async function showQRSyncSend() {
 
   renderQR(0);
 
-  $('#qrPrevBtn').addEventListener('click', () => { if (currentPage > 0) renderQR(currentPage - 1); });
-  $('#qrNextBtn').addEventListener('click', () => { if (currentPage < total - 1) renderQR(currentPage + 1); });
+  $('#qrPrevBtn').addEventListener('click', function() { if (currentPage > 0) renderQR(currentPage - 1); });
+  $('#qrNextBtn').addEventListener('click', function() { if (currentPage < total - 1) renderQR(currentPage + 1); });
 }
 
 // ============ QR Sync - Receive ============
@@ -2178,156 +2190,6 @@ function clearPhoto(pickerId, dataId) {
 function escHtml(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ============ Built-in QR Code Encoder (no external library needed) ============
-function buildQRMatrix(data, size) {
-  // Minimal QR code encoder supporting byte mode, version 2 (25x25), L-level ECC
-  var eccCodeWords, g1Poly, g2Poly;
-
-  // Precomputed: version 2, L-level, total codewords=44, data codewords=34
-  // Generator polynomial for 10 ECC codewords
-  var GEN_POLY = [1, 216, 194, 159, 111, 199, 94, 95, 113, 157, 193]; // alpha exponents for generator g(x)
-
-  // Create a clean matrix
-  var modules = new Uint8Array(size * size);
-
-  // Place finder patterns (3 corners)
-  function fillRect(x, y, w, h, v) {
-    for (var r = y; r < y + h; r++)
-      for (var c = x; c < x + w; c++)
-        if (r >= 0 && r < size && c >= 0 && c < size) modules[r * size + c] = v;
-  }
-  function drawFinder(cx, cy) {
-    fillRect(cx - 3, cy - 3, 7, 7, 1);
-    fillRect(cx - 2, cy - 2, 5, 5, 0);
-    fillRect(cx - 1, cy - 1, 3, 3, 1);
-  }
-  drawFinder(3, 3);
-  drawFinder(size - 4, 3);
-  drawFinder(3, size - 4);
-
-  // Timing patterns
-  for (var i = 8; i < size - 8; i++) {
-    modules[6 * size + i] = i % 2 === 0 ? 1 : 0;
-    modules[i * size + 6] = i % 2 === 0 ? 1 : 0;
-  }
-
-  // Format info (mask 2, L-level): 101010000010010
-  var formatBits = [1,0,1,0,1,0,0,0,0,0,1,0,0,1,0];
-  var fi = 0;
-  // Top-left format
-  for (var i = 0; i <= 5; i++) { modules[i * size + 8] = formatBits[fi++]; }
-  modules[7 * size + 8] = formatBits[fi++];
-  modules[8 * size + 8] = formatBits[fi++];
-  modules[8 * size + 7] = formatBits[fi++];
-  for (var i = 5; i >= 0; i--) { modules[8 * size + i] = formatBits[fi++]; }
-  // Bottom-left + top-right
-  modules[size * (size - 1) + 8] = 1;
-  for (var i = 0; i <= 7; i++) { modules[(size - 1 - i) * size + 8] = formatBits[i]; }
-  for (var i = 0; i <= 7; i++) { modules[8 * size + (size - 7 + i)] = formatBits[i]; }
-  modules[8 * size + (size - 8)] = 1;
-
-  // Encode data into byte mode
-  var dataBytes = [];
-  dataBytes.push(0x40); // byte mode indicator (4 bits) + data count length (8 bits for ver 2) = 0100 0000, split later
-  // Actually: mode indicator 4 bits (0100), count indicator 8 bits, then data bytes, then terminator 0000
-  var bits = [];
-  // Mode indicator: 0100
-  bits.push(0,1,0,0);
-  // Character count (8 bits for version 1-9 byte mode)
-  var len = data.length;
-  for (var b = 7; b >= 0; b--) bits.push((len >> b) & 1);
-  // Data bytes
-  for (var i = 0; i < len; i++) {
-    var ch = data.charCodeAt(i) & 0xFF;
-    for (var b = 7; b >= 0; b--) bits.push((ch >> b) & 1);
-  }
-  // Terminator: up to 4 zeros
-  while (bits.length % 8 !== 0) bits.push(0);
-  var termNeeded = Math.min(4, 34 * 8 - bits.length);
-  for (var i = 0; i < termNeeded; i++) bits.push(0);
-  // Pad to byte boundary
-  while (bits.length % 8 !== 0) bits.push(0);
-  // Pad with 11101100, 00010001 alternating
-  var pads = [0xEC, 0x11];
-  var pi = 0;
-  while (bits.length < 34 * 8) {
-    var b = pads[pi % 2];
-    for (var j = 7; j >= 0; j--) bits.push((b >> j) & 1);
-    pi++;
-  }
-
-  // Convert bits to bytes
-  var msgBytes = [];
-  for (var i = 0; i < bits.length; i += 8) {
-    var val = 0;
-    for (var j = 0; j < 8; j++) val = (val << 1) | (bits[i + j] || 0);
-    msgBytes.push(val);
-  }
-
-  // GF(256) arithmetic
-  var expTable = new Uint8Array(512);
-  var logTable = new Uint8Array(256);
-  var x = 1;
-  for (var i = 0; i < 255; i++) { expTable[i] = x; logTable[x] = i; x = (x << 1) ^ ((x & 0x80) ? 0x11D : 0); }
-  for (var i = 255; i < 512; i++) expTable[i] = expTable[i - 255];
-
-  function gfMul(a, b) { if (a === 0 || b === 0) return 0; return expTable[logTable[a] + logTable[b]]; }
-  function gfPow(b, e) { var r = 1; while (e--) r = gfMul(r, b); return r; }
-
-  // Generate ECC
-  var ecc = new Uint8Array(10);
-  for (var i = 0; i < msgBytes.length; i++) {
-    var fb = msgBytes[i] ^ ecc[0];
-    for (var j = 0; j < 9; j++) ecc[j] = ecc[j + 1] ^ gfMul(GEN_POLY[9 - j], fb);
-    ecc[9] = gfMul(GEN_POLY[0], fb);
-  }
-
-  // Interleave: message bytes then ECC
-  var allBytes = msgBytes.concat(Array.from(ecc));
-
-  // Place data into matrix (mask 2 pattern: (row + col) % 2 === 0 ? inverted : normal)
-  // Standard upward zigzag placement, skipping function patterns
-  var col = size - 1;
-  var row = size - 1;
-  var dir = -1; // upward
-  var bi = allBytes.length * 8 - 1;
-  var mask = 2; // (row + col) % 2 === 0
-
-  function isFunc(row, col) {
-    if (row === 6 || col === 6) return true; // timing
-    // Finder patterns
-    if (row <= 8 && col <= 8) return true;
-    if (row <= 8 && col >= size - 9) return true;
-    if (row >= size - 9 && col <= 8) return true;
-    // Format info
-    if (col === 8 && (row <= 8 || row >= size - 8)) return true;
-    if (row === 8 && col <= 8) return true;
-    return false;
-  }
-
-  while (bi >= 0) {
-    if (col === 6) col = 5; // skip timing column
-    if (!isFunc(row, col)) {
-      var val = (allBytes[Math.floor(bi / 8)] >> (7 - (bi % 8))) & 1;
-      // Apply mask 2
-      if ((row + col) % 2 === 0) val = 1 - val;
-      modules[row * size + col] = val;
-      bi--;
-    }
-    // Move to next position
-    row += dir;
-    if (row < 0 || row >= size) {
-      dir = -dir;
-      row += dir;
-      col -= 2;
-      if (col < 0) break;
-      if (col === 6) col = 5;
-    }
-  }
-
-  return modules;
 }
 
 // ============ Service Worker ============
